@@ -1,0 +1,31 @@
+<section id="como-funciona" class="how-it-works" aria-label="Cómo funciona ObesiApp">
+  <div class="container">
+    <app-section-title
+      tag="Cómo funciona"
+      title="Tu camino a la salud en 5 pasos"
+      subtitle="Un proceso simple, guiado y divertido para transformar los hábitos de toda la familia."
+    />
+
+    <div class="hiw__timeline">
+      <div class="hiw__line" aria-hidden="true"></div>
+
+      <div
+        *ngFor="let step of steps; let i = index"
+        class="hiw__step reveal"
+        [class.hiw__step--even]="i % 2 === 1"
+        [style.--delay]="i * 0.12 + 's'"
+      >
+        <div class="hiw__step-dot" [style.background]="step.color" aria-hidden="true">
+          <span>{{ step.icon }}</span>
+        </div>
+
+        <div class="hiw__step-card" [style.--accent]="step.color">
+          <div class="hiw__step-number" [style.color]="step.color">{{ step.number }}</div>
+          <h3 class="hiw__step-title">{{ step.title }}</h3>
+          <p class="hiw__step-desc">{{ step.desc }}</p>
+          <div class="hiw__step-bar" [style.background]="step.color" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

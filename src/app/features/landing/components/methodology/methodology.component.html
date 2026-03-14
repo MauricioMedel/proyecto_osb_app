@@ -1,0 +1,42 @@
+<section id="metodologia" class="methodology" aria-label="Metodología tecnológica de ObesiApp">
+  <div class="container">
+    <app-section-title
+      tag="Metodología Tech"
+      title="Construido con las mejores prácticas"
+      subtitle="ObesiApp nace de una ingeniería sólida y una metodología probada para garantizar confiabilidad y escalabilidad."
+    />
+
+    <div class="methodology__pillars">
+      <article
+        *ngFor="let pillar of pillars; let i = index"
+        class="pillar-card reveal"
+        [style.--delay]="i * 0.12 + 's'"
+        [style.--accent]="pillar.color"
+      >
+        <div class="pillar-card__icon" [style.color]="pillar.color">{{ pillar.icon }}</div>
+        <h3 class="pillar-card__title">{{ pillar.title }}</h3>
+        <p class="pillar-card__desc">{{ pillar.desc }}</p>
+        <div class="pillar-card__tags">
+          <span
+            *ngFor="let tag of pillar.tags"
+            class="pillar-card__tag"
+            [style.background]="pillar.color + '20'"
+            [style.color]="pillar.color"
+          >{{ tag }}</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="methodology__stack reveal">
+      <h3 class="methodology__stack-title">Stack tecnológico</h3>
+      <div class="methodology__stack-grid">
+        <div *ngFor="let tech of techStack" class="methodology__tech">
+          <span class="methodology__tech-icon">{{ tech.icon }}</span>
+          <span class="methodology__tech-name">{{ tech.name }}</span>
+          <span class="methodology__tech-desc">{{ tech.desc }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

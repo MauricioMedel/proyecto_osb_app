@@ -1,0 +1,86 @@
+<header class="navbar" [class.navbar--scrolled]="scrolled" role="banner">
+  <div class="container navbar__inner">
+
+    <!-- Logo -->
+    <a class="navbar__logo" href="#" (click)="scrollTo('inicio')" aria-label="OBS Infantil inicio">
+      <span class="navbar__logo-text">OBS Infantil <strong>App</strong></span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="navbar__nav" role="navigation" aria-label="Navegación principal">
+      <ul class="navbar__links">
+
+        <li *ngFor="let link of navLinks">
+          <a
+            class="navbar__link"
+            href="#"
+            (click)="$event.preventDefault(); scrollTo(link.id)"
+            [attr.aria-label]="'Ir a ' + link.label"
+          >
+            {{ link.label }}
+          </a>
+        </li>
+
+        <!-- Iniciar sesión -->
+        <li>
+          <a
+  class="navbar__link"
+  href="#"
+  (click)="$event.preventDefault(); login()"
+  aria-label="Iniciar sesión en OBS Infantil"
+>
+  Iniciar
+</a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <!-- CTA Button -->
+    
+
+    <!-- Hamburger -->
+    <button
+      class="navbar__hamburger"
+      [class.navbar__hamburger--active]="menuOpen"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen"
+      aria-label="Abrir menú"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="navbar__mobile" [class.navbar__mobile--open]="menuOpen" role="dialog" aria-label="Menú móvil">
+    <ul class="navbar__mobile-links">
+
+      <li *ngFor="let link of navLinks">
+        <a
+          href="#"
+          (click)="$event.preventDefault(); scrollTo(link.id)"
+        >
+          {{ link.label }}
+        </a>
+      </li>
+
+      <li>
+        <a
+  class="navbar__link"
+  href="#"
+  (click)="$event.preventDefault(); login()"
+  aria-label="Iniciar sesión en OBS Infantil"
+>
+  Iniciar
+</a>
+      </li>
+
+    
+
+    </ul>
+  </div>
+
+</header>

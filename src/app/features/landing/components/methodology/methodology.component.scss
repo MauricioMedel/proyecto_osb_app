@@ -1,0 +1,130 @@
+.methodology {
+  padding: 100px 0;
+  background: var(--bg);
+
+  &__pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 56px;
+  }
+
+  &__stack {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: var(--shadow);
+
+    &-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    &-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      @media (max-width: 480px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  }
+
+  &__tech {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 20px 12px;
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: var(--transition);
+
+    &:hover {
+      background: linear-gradient(135deg, #e8f4ff, #f0f9e8);
+      transform: translateY(-4px);
+    }
+
+    &-icon {
+      font-size: 32px;
+    }
+
+    &-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    &-desc {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  }
+
+  @media (max-width: 768px) {
+    &__pillars {
+      grid-template-columns: 1fr;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+.pillar-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--accent, var(--primary));
+  transition: var(--transition);
+  transition-delay: var(--delay, 0s);
+
+  &:hover {
+    transform: translateX(8px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  &__icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  &__title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  &__desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__tag {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+    letter-spacing: 0.3px;
+  }
+}

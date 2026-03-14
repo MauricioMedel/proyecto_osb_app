@@ -1,0 +1,116 @@
+<section id="inicio" class="hero" aria-label="Sección principal">
+  <!-- Animated background blobs -->
+  <div class="hero__blob hero__blob--1" aria-hidden="true"></div>
+  <div class="hero__blob hero__blob--2" aria-hidden="true"></div>
+  <div class="hero__blob hero__blob--3" aria-hidden="true"></div>
+
+  <!-- Floating emojis -->
+  <div class="hero__float hero__float--3" aria-hidden="true">⭐</div>
+  <div class="hero__float hero__float--5" aria-hidden="true">💪</div>
+
+  <div class="container hero__inner">
+    <!-- Text Content -->
+    <div class="hero__content">
+      <div class="hero__badge">
+        <span>🚀</span> IA + Gamificación + Salud
+      </div>
+
+      <h1 class="hero__title">
+        Transformando hábitos,<br>
+        <span class="hero__title-highlight">construyendo futuros saludables</span><br>
+      </h1>
+
+      <p class="hero__subtitle">
+        OBS Infantil combina IA nutricional y gamificación para prevenir
+        la obesidad infantil de forma divertida y efectiva.
+      </p>
+
+      <div class="hero__actions">
+        <button
+          class="btn btn--primary hero__btn"
+          (click)="scrollTo('descargar')"
+          aria-label="Descargar OBS Infantil"
+        >
+          📱 Descargar App
+        </button>
+
+        <button
+          class="btn btn--outline hero__btn"
+          (click)="scrollTo('funciones')"
+          aria-label="Conocer más sobre OBS Infantil"
+        >
+          Conocer más →
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <span class="hero__stat-number">+500</span>
+          <span class="hero__stat-label">Familias</span>
+        </div>
+
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+
+        <div class="hero__stat">
+          <span class="hero__stat-number">98%</span>
+          <span class="hero__stat-label">Satisfacción</span>
+        </div>
+
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+
+        <div class="hero__stat">
+          <span class="hero__stat-number">3x</span>
+          <span class="hero__stat-label">Más efectivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone Mockup -->
+    <div class="hero__mockup" aria-label="Mockup de la aplicación OBS Infantil">
+      <div class="hero__phone">
+        <div class="hero__phone-notch"></div>
+
+        <div class="hero__phone-screen">
+          <div class="hero__app-header">
+            <span>Hola, Daniela! 👋</span>
+            <div class="hero__app-avatar">D</div>
+          </div>
+
+          <div class="hero__app-level">
+            <div class="hero__app-level-info">
+              <span>⭐ Nivel 5</span>
+              <span class="hero__app-xp">450 / 600 XP</span>
+            </div>
+
+            <div class="hero__app-bar">
+              <div class="hero__app-bar-fill" style="width: 75%"></div>
+            </div>
+          </div>
+
+          <div class="hero__app-challenge">
+            <div class="hero__app-challenge-title">🎯 Reto de hoy</div>
+            <div class="hero__app-challenge-item">🥗 Come 3 porciones de verduras</div>
+            <div class="hero__app-challenge-item">💧 Toma 8 vasos de agua</div>
+            <div class="hero__app-challenge-item done">✅ Camina 30 minutos</div>
+          </div>
+
+          <div class="hero__app-reward">
+            <span>🏆</span>
+            <span>¡Ganaste 50 XP ayer!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glow effect -->
+      <div class="hero__phone-glow" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Wave bottom -->
+  <div class="hero__wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+</section>

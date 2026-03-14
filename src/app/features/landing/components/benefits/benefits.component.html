@@ -1,0 +1,26 @@
+<section id="beneficios" class="benefits" aria-label="Beneficios de ObesiApp">
+  <div class="container">
+    <app-section-title
+      tag="Beneficios"
+      title="Impacto real en la vida de tu familia"
+      subtitle="ObesiApp no solo registra datos: genera cambios reales, duraderos y medibles."
+    />
+
+    <div class="benefits__grid">
+      <article
+        *ngFor="let benefit of benefits; let i = index"
+        class="benefit-card reveal"
+        [style.--delay]="i * 0.08 + 's'"
+      >
+        <div class="benefit-card__icon-wrap" [style.background]="benefit.gradient">
+          <span class="benefit-card__icon">{{ benefit.icon }}</span>
+        </div>
+        <div class="benefit-card__content">
+          <h3 class="benefit-card__title" [style.color]="benefit.accent">{{ benefit.title }}</h3>
+          <p class="benefit-card__desc">{{ benefit.desc }}</p>
+        </div>
+        <div class="benefit-card__line" [style.background]="benefit.accent"></div>
+      </article>
+    </div>
+  </div>
+</section>

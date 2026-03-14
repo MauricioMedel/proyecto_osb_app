@@ -1,0 +1,31 @@
+<section id="problema" class="problem" aria-label="El problema de la obesidad infantil">
+  <div class="container">
+    <app-section-title
+      tag="El Problema"
+      title="La obesidad infantil es una crisis real"
+      subtitle="México enfrenta una emergencia de salud pública: millones de niños crecen con hábitos que comprometen su futuro."
+    />
+
+    <div class="problem__grid">
+      <article
+        *ngFor="let stat of stats; let i = index"
+        class="problem__card reveal"
+        [style.--delay]="i * 0.1 + 's'"
+        [style.--accent]="stat.color"
+      >
+        <div class="problem__card-icon">{{ stat.icon }}</div>
+        <div class="problem__card-number" [style.color]="stat.color">{{ stat.number }}</div>
+        <h3 class="problem__card-label">{{ stat.label }}</h3>
+        <p class="problem__card-desc">{{ stat.desc }}</p>
+        <div class="problem__card-accent" [style.background]="stat.color"></div>
+      </article>
+    </div>
+
+    <div class="problem__callout reveal">
+      <div class="problem__callout-icon">💡</div>
+      <div class="problem__callout-text">
+        <strong>OBS Infantil es la solución:</strong> tecnología accesible, gamificada y personalizada para revertir esta tendencia desde casa.
+      </div>
+    </div>
+  </div>
+</section>

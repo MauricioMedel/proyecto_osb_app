@@ -1,0 +1,33 @@
+<section id="funciones" class="features" aria-label="Funciones de ObesiApp">
+  <div class="container">
+    <app-section-title
+      tag="¿Qué es OBS Infantil?"
+      title="Tecnología que cuida a tus hijos"
+      subtitle="Tres pilares tecnológicos diseñados para hacer de la salud una experiencia divertida y sostenible."
+    />
+
+    <div class="features__grid">
+      <article
+        *ngFor="let feature of features; let i = index"
+        class="feature-card reveal"
+        [style.--delay]="i * 0.15 + 's'"
+      >
+        <div class="feature-card__header" [style.background]="feature.gradient">
+          <div class="feature-card__icon" [style.color]="feature.color">{{ feature.icon }}</div>
+          <div class="feature-card__badge" [style.background]="feature.color">
+            {{ feature.subtitle }}
+          </div>
+        </div>
+        <div class="feature-card__body">
+          <h3 class="feature-card__title" [style.color]="feature.color">{{ feature.title }}</h3>
+          <p class="feature-card__desc">{{ feature.desc }}</p>
+          <ul class="feature-card__highlights">
+            <li *ngFor="let h of feature.highlights" [style.--dot-color]="feature.color">
+              {{ h }}
+            </li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,87 @@
+<section class="login">
+
+  <div class="container login__container">
+
+    <!-- Título -->
+    <div class="section-title">
+      <span class="section-title__tag">Acceso</span>
+
+      <h2 class="section-title__heading">
+        Iniciar sesión
+      </h2>
+
+      <p class="section-title__subtitle">
+        Accede a tu cuenta de OBS Infantil
+      </p>
+    </div>
+
+    <!-- Card -->
+    <div class="login__card">
+
+      <form (ngSubmit)="login()" class="login__form">
+
+        <!-- Email -->
+        <div class="login__group">
+          <label>Correo electrónico</label>
+
+          <div class="login__input">
+            <span class="login__icon">📧</span>
+            <input
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="correo@ejemplo.com"
+              required
+            >
+          </div>
+
+        </div>
+
+        <!-- Password -->
+        <div class="login__group">
+          <label>Contraseña</label>
+
+          <div class="login__input">
+            <span class="login__icon">🔒</span>
+
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            >
+
+            <button
+              type="button"
+              class="login__toggle"
+              (click)="togglePassword()"
+            >
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+
+          </div>
+
+        </div>
+
+        <button class="btn btn--primary login__btn" type="submit">
+          Iniciar sesión
+        </button>
+
+      </form>
+
+      <!-- Crear cuenta -->
+      <p class="login__register">
+  ¿No tienes cuenta?
+  <a (click)="goRegister()">Crear cuenta</a>
+</p>
+
+      <button class="login__back" (click)="goHome()">
+        ← Volver al inicio
+      </button>
+
+    </div>
+
+  </div>
+
+</section>

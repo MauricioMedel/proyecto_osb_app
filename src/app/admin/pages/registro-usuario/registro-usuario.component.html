@@ -1,0 +1,112 @@
+<section class="registro">
+
+  <div class="container registro__container">
+
+    <div class="section-title">
+      <span class="section-title__tag">Registro</span>
+
+      <h2 class="section-title__heading">
+        Crear cuenta
+      </h2>
+
+      <p class="section-title__subtitle">
+        Regístrate para comenzar a usar OBS Infantil
+      </p>
+    </div>
+
+    <div class="registro__card">
+
+      <form (ngSubmit)="register()" class="registro__form">
+
+        <div class="registro__grid">
+
+          <div class="registro__group">
+            <label>Nombre</label>
+            <input type="text" [(ngModel)]="nombre" name="nombre" placeholder="Juan">
+          </div>
+
+          <div class="registro__group">
+            <label>Apellidos</label>
+            <input type="text" [(ngModel)]="apellidos" name="apellidos" placeholder="Pérez López">
+          </div>
+
+        </div>
+
+        <div class="registro__grid">
+
+          <div class="registro__group">
+            <label>Edad</label>
+            <input type="number" [(ngModel)]="edad" name="edad" placeholder="10">
+          </div>
+
+          <div class="registro__group">
+            <label>Estatura (cm)</label>
+            <input type="number" [(ngModel)]="estatura" name="estatura" placeholder="140">
+          </div>
+
+        </div>
+
+        <div class="registro__group">
+          <label>Sexo</label>
+
+          <div class="registro__radio">
+
+            <label>
+              <input type="radio" value="Masculino" [(ngModel)]="sexo" name="sexo">
+              Masculino
+            </label>
+
+            <label>
+              <input type="radio" value="Femenino" [(ngModel)]="sexo" name="sexo">
+              Femenino
+            </label>
+
+          </div>
+
+        </div>
+
+        <div class="registro__group">
+          <label>Correo electrónico</label>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="correo@email.com">
+        </div>
+
+        <div class="registro__group">
+          <label>Contraseña</label>
+
+          <div class="registro__password">
+
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••"
+            >
+
+            <button type="button" (click)="togglePassword()">
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+
+          </div>
+
+        </div>
+
+        <button class="btn btn--primary registro__btn" type="submit">
+          Crear cuenta
+        </button>
+
+      </form>
+
+      <p class="registro__login">
+        ¿Ya tienes cuenta?
+        <a (click)="goLogin()">Iniciar sesión</a>
+      </p>
+
+      <button class="registro__back" (click)="goHome()">
+        ← Volver al inicio
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
