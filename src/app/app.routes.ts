@@ -1,6 +1,9 @@
-import { Routes } from '@angular/router';
+import { Routes }    from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+
+  // ── Rutas públicas ────────────────────────────────────────────────────────
 
   // Landing pública
   {
@@ -26,14 +29,18 @@ export const routes: Routes = [
       .then(m => m.RegistroUsuarioComponent),
   },
 
+  // ── Rutas protegidas (requieren sesión activa) ────────────────────────────
+
   // Panel
   {
     path: 'panel',
+    canActivate: [authGuard],              // ← protegida con JWT
     loadComponent: () =>
       import('./panel/pages/panel/panel.component')
       .then(m => m.PanelComponent),
   },
 
+  // ── Fallback ──────────────────────────────────────────────────────────────
   {
     path: '**',
     redirectTo: '',
