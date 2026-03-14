@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-registro-usuario',
@@ -12,50 +13,63 @@ import { Router } from '@angular/router';
 })
 export class RegistroUsuarioComponent {
 
-  constructor(private router: Router) {}
-
-  nombre = '';
-  apellidos = '';
-  edad: number | null = null;
-  estatura: number | null = null;
-  sexo = '';
+  username = '';
+  displayName = '';
   email = '';
   password = '';
 
-  showPassword = false;
+  loading = false;
+  errorMsg = '';
 
-  togglePassword(){
-    this.showPassword = !this.showPassword;
-  }
+  constructor(
+    private auth: AuthService,
+    private router: Router
+  ) {}
 
-  register(){
+  register(): void {
 
-    if(!this.nombre || !this.apellidos || !this.edad || !this.estatura || !this.sexo || !this.email || !this.password){
-      alert('Por favor completa todos los campos');
+    if (!this.username || !this.email || !this.password) {
+      this.errorMsg = 'Completa todos los campos obligatorios';
       return;
     }
 
-    console.log({
-      nombre: this.nombre,
-      apellidos: this.apellidos,
-      edad: this.edad,
-      estatura: this.estatura,
-      sexo: this.sexo,
+    this.loading = true;
+    this.errorMsg = '';
+
+    this.auth.register({
+      username: this.username,
       email: this.email,
-      password: this.password
+      password: this.password,
+      displayName: this.displayName
+    }).subscribe({
+
+      next: () => {
+
+        this.loading = false;
+
+        alert('Cuenta creada correctamente');
+
+        // redirige al login
+        this.router.navigate(['/login']);
+
+      },
+
+      error: (err) => {
+
+        this.loading = false;
+
+        this.errorMsg =
+          err.error?.message ||
+          'No se pudo registrar el usuario';
+
+      }
+
     });
 
-    alert('Usuario registrado correctamente');
-
-    this.router.navigate(['/login']);
   }
 
-  goLogin(){
+  goLogin(): void {
     this.router.navigate(['/login']);
-  }
-
-  goHome(){
-    this.router.navigate(['/']);
   }
 
 }
