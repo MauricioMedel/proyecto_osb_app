@@ -36,10 +36,14 @@ export class LoginComponent {
 
         this.loading = false;
 
-        // guardar JWT
+        // Guardar JWT
         localStorage.setItem('token', res.token);
 
-        // ir al panel
+        // Limpiar campos
+        this.username = '';
+        this.password = '';
+
+        // Ir al panel
         this.router.navigate(['/panel']);
 
       },
@@ -49,15 +53,20 @@ export class LoginComponent {
         this.loading = false;
         this.errorMsg = err.error?.error?.message || 'Error al iniciar sesión';
 
+        // Limpiar campos si falla
+        this.username = '';
+        this.password = '';
+
       }
 
     });
   }
 
   goHome(): void {
-  this.router.navigate(['/']);
-}
-  goRegister() {
+    this.router.navigate(['/']);
+  }
+
+  goRegister(): void {
     this.router.navigate(['/registro_usuario']);
   }
 

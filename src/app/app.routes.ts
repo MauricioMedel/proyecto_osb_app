@@ -32,14 +32,29 @@ export const routes: Routes = [
   // ── Rutas protegidas (requieren sesión activa) ────────────────────────────
 
   // Panel
-  {
-    path: 'panel',
-    canActivate: [authGuard],              // ← protegida con JWT
-    loadComponent: () =>
-      import('./panel/pages/panel/panel.component')
-      .then(m => m.PanelComponent),
-  },
+{
+  path: 'panel',
+  canActivate: [authGuard],
+  loadComponent: () =>
+    import('./panel/pages/panel/panel.component')
+    .then(m => m.PanelComponent),
+},
 
+{
+  path: 'menu',
+  canActivate: [authGuard],
+  loadComponent: () =>
+    import('./child/pages/menu/menu.component')
+    .then(m => m.MenuComponent),
+},
+
+{
+  path: 'administrador',
+  canActivate: [authGuard],
+  loadComponent: () =>
+    import('./admin/pages/administrador/administrador.component')
+    .then(m => m.AdministradorComponent),
+},
   // ── Fallback ──────────────────────────────────────────────────────────────
   {
     path: '**',
