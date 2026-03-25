@@ -19,9 +19,12 @@ export class LoginComponent {
   errorMsg = '';
 
   constructor(private auth: AuthService, private router: Router) {}
-
+  
   login(): void {
 
+    // =============================
+    // VALIDACIÓN BÁSICA
+    // =============================
     if (!this.username || !this.password) {
       this.errorMsg = 'Ingresa usuario y contraseña';
       return;
@@ -30,38 +33,50 @@ export class LoginComponent {
     this.loading = true;
     this.errorMsg = '';
 
+    // =============================
+    // LOGIN
+    // =============================
     this.auth.login(this.username, this.password).subscribe({
 
-      next: (res) => {
-
+      next: () => {
         this.loading = false;
 
-        // Guardar JWT
-        localStorage.setItem('token', res.token);
+        // 🔥 Obtener usuario desde el token
+        const user = this.auth.getCurrentUser();
 
         // Limpiar campos
         this.username = '';
         this.password = '';
 
-        // Ir al panel
-        this.router.navigate(['/panel']);
-
+        // =============================
+        // REDIRECCIÓN POR ROL
+        // =============================
+        if (user?.role === 'admin') {
+          this.router.navigate(['/administrador']);
+        } else if (user?.role === 'guardian') {
+          this.router.navigate(['/']); // puedes cambiar esto
+        } else if (user?.role === 'child') {
+          this.router.navigate(['/']); // puedes cambiar esto
+        } else {
+          this.router.navigate(['/']);
+        }
       },
 
       error: (err) => {
-
         this.loading = false;
         this.errorMsg = err.error?.error?.message || 'Error al iniciar sesión';
 
         // Limpiar campos si falla
         this.username = '';
         this.password = '';
-
       }
 
     });
   }
 
+  // =============================
+  // NAVEGACIÓN
+  // =============================
   goHome(): void {
     this.router.navigate(['/']);
   }
@@ -69,5 +84,4 @@ export class LoginComponent {
   goRegister(): void {
     this.router.navigate(['/registro_usuario']);
   }
-
 }

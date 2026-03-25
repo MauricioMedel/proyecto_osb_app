@@ -1,1 +1,125 @@
-<p>administrador works!</p>
+
+<div class="layout">
+
+  <!-- =============================
+       SIDEBAR
+  ============================== -->
+  <aside class="sidebar">
+    <h2>Admin</h2>
+
+    <ul>
+      <li>🏠 Dashboard</li>
+      <li>👤 Usuarios</li>
+      <li>📊 Reportes</li>
+      <li>⚙️ Configuración</li>
+      <li (click)="authService.logout()">🚪 Logout</li>
+    </ul>
+  </aside>
+
+  <!-- =============================
+       MAIN
+  ============================== -->
+  <main class="main">
+
+    <h1>Dashboard Administrativo</h1>
+
+    <!-- =============================
+         CARDS (INDICADORES)
+    ============================== -->
+    <div class="cards">
+      <div class="card blue">
+        <p>Total Usuarios</p>
+        <h2>{{ totalUsuarios }}</h2>
+      </div>
+
+      <div class="card green">
+        <p>Activos</p>
+        <h2>{{ activos }}</h2>
+      </div>
+
+      <div class="card red">
+        <p>Inactivos</p>
+        <h2>{{ inactivos }}</h2>
+      </div>
+
+      <div class="card orange">
+        <p>Admins</p>
+        <h2>{{ admins }}</h2>
+      </div>
+    </div>
+
+    <!-- =============================
+         FORMULARIO CRUD
+    ============================== -->
+    <div class="form-card">
+
+      <h3>{{ editMode ? 'Editar Usuario' : 'Crear Usuario' }}</h3>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <input formControlName="username" placeholder="Username">
+        <input formControlName="email" placeholder="Email">
+
+        <select formControlName="role">
+          <option value="">Rol</option>
+          <option value="admin">Admin</option>
+          <option value="guardian">Guardian</option>
+          <option value="child">Child</option>
+        </select>
+
+        <label>
+          <input type="checkbox" formControlName="active">
+          Activo
+        </label>
+
+        <div class="btn-group">
+          <button type="submit">
+            {{ editMode ? 'Actualizar' : 'Crear' }}
+          </button>
+          <button type="button" (click)="reset()">Cancelar</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- =============================
+         TABLA
+    ============================== -->
+    <div class="table-card">
+
+      <h3>Usuarios</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role }}</td>
+            <td>
+              <span [class.active]="u.active" [class.inactive]="!u.active">
+                {{ u.active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <button class="edit" (click)="edit(u)">Editar</button>
+              <button class="delete" (click)="delete(u.account_id)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </main>
+</div>
+```
