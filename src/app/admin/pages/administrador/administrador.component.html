@@ -1,125 +1,624 @@
+<!-- src/app/admin/pages/administrador/administrador.component.html -->
 
-<div class="layout">
+<div class="admin-shell">
 
-  <!-- =============================
-       SIDEBAR
-  ============================== -->
-  <aside class="sidebar">
-    <h2>Admin</h2>
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🏥</span>
+      <span class="brand-text">ObsApp</span>
+    </div>
 
-    <ul>
-      <li>🏠 Dashboard</li>
-      <li>👤 Usuarios</li>
-      <li>📊 Reportes</li>
-      <li>⚙️ Configuración</li>
-      <li (click)="authService.logout()">🚪 Logout</li>
-    </ul>
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab==='dashboard'"
+              (click)="setTab('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab==='usuarios'"
+              (click)="setTab('usuarios')">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Usuarios</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab==='auditoria'"
+              (click)="setTab('auditoria')">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Auditoría</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ currentUser?.username?.charAt(0)?.toUpperCase() }}</div>
+        <div class="user-meta">
+          <span class="user-name">{{ currentUser?.username }}</span>
+          <span class="user-role">Administrador</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">⎋</button>
+    </div>
   </aside>
 
-  <!-- =============================
-       MAIN
-  ============================== -->
-  <main class="main">
+  <!-- ═══ CONTENIDO PRINCIPAL ════════════════════════════════════════════════ -->
+  <main class="main-content">
 
-    <h1>Dashboard Administrativo</h1>
-
-    <!-- =============================
-         CARDS (INDICADORES)
-    ============================== -->
-    <div class="cards">
-      <div class="card blue">
-        <p>Total Usuarios</p>
-        <h2>{{ totalUsuarios }}</h2>
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="btn-toggle-sidebar" (click)="sidebarOpen=!sidebarOpen">☰</button>
+      <div class="topbar-title">
+        <h1>{{ activeTab === 'dashboard' ? 'Dashboard' : activeTab === 'usuarios' ? 'Gestión de Usuarios' : 'Auditoría del Sistema' }}</h1>
       </div>
-
-      <div class="card green">
-        <p>Activos</p>
-        <h2>{{ activos }}</h2>
+      <div class="topbar-actions">
+        <div class="api-badge" [class.ok]="kpis.apiStatus==='ok'" [class.degraded]="kpis.apiStatus!=='ok'">
+          <span class="dot"></span>
+          API {{ kpis.apiStatus === 'ok' ? 'Operativa' : 'Degradada' }}
+        </div>
       </div>
+    </header>
 
-      <div class="card red">
-        <p>Inactivos</p>
-        <h2>{{ inactivos }}</h2>
-      </div>
+    <!-- ══ TAB: DASHBOARD ══════════════════════════════════════════════════ -->
+    <section *ngIf="activeTab==='dashboard'" class="tab-content">
 
-      <div class="card orange">
-        <p>Admins</p>
-        <h2>{{ admins }}</h2>
-      </div>
-    </div>
-
-    <!-- =============================
-         FORMULARIO CRUD
-    ============================== -->
-    <div class="form-card">
-
-      <h3>{{ editMode ? 'Editar Usuario' : 'Crear Usuario' }}</h3>
-
-      <form [formGroup]="form" (ngSubmit)="submit()">
-
-        <input formControlName="username" placeholder="Username">
-        <input formControlName="email" placeholder="Email">
-
-        <select formControlName="role">
-          <option value="">Rol</option>
-          <option value="admin">Admin</option>
-          <option value="guardian">Guardian</option>
-          <option value="child">Child</option>
-        </select>
-
-        <label>
-          <input type="checkbox" formControlName="active">
-          Activo
-        </label>
-
-        <div class="btn-group">
-          <button type="submit">
-            {{ editMode ? 'Actualizar' : 'Crear' }}
-          </button>
-          <button type="button" (click)="reset()">Cancelar</button>
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-total">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.totalUsers }}</span>
+            <span class="kpi-label">Total usuarios</span>
+          </div>
+          <div class="kpi-sub">{{ kpis.activeUsers }} activos</div>
         </div>
 
-      </form>
-    </div>
+        <div class="kpi-card kpi-guardian">
+          <div class="kpi-icon">🧑‍👧</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.totalGuardians }}</span>
+            <span class="kpi-label">Tutores</span>
+          </div>
+          <div class="kpi-sub">registrados</div>
+        </div>
 
-    <!-- =============================
-         TABLA
-    ============================== -->
-    <div class="table-card">
+        <div class="kpi-card kpi-child">
+          <div class="kpi-icon">🧒</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.totalChildren }}</span>
+            <span class="kpi-label">Niños</span>
+          </div>
+          <div class="kpi-sub">perfiles activos</div>
+        </div>
 
-      <h3>Usuarios</h3>
+        <div class="kpi-card kpi-locked">
+          <div class="kpi-icon">🔒</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.lockedUsers }}</span>
+            <span class="kpi-label">Bloqueados</span>
+          </div>
+          <div class="kpi-sub">requieren atención</div>
+        </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
+        <div class="kpi-card kpi-new">
+          <div class="kpi-icon">✨</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.newThisWeek }}</span>
+            <span class="kpi-label">Nuevos esta semana</span>
+          </div>
+          <div class="kpi-sub">últimos 7 días</div>
+        </div>
 
-        <tbody>
-          <tr *ngFor="let u of usuarios">
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.role }}</td>
-            <td>
-              <span [class.active]="u.active" [class.inactive]="!u.active">
-                {{ u.active ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td>
-              <button class="edit" (click)="edit(u)">Editar</button>
-              <button class="delete" (click)="delete(u.account_id)">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="kpi-card kpi-server" [class.error]="kpis.dbStatus!=='ok'">
+          <div class="kpi-icon">🗄️</div>
+          <div class="kpi-data">
+            <span class="kpi-value">{{ kpis.dbStatus === 'ok' ? 'OK' : 'ERROR' }}</span>
+            <span class="kpi-label">Base de datos</span>
+          </div>
+          <div class="kpi-sub">Uptime: {{ kpis.uptime }}</div>
+        </div>
+      </div>
 
-    </div>
+      <!-- Distribución y últimos usuarios -->
+      <div class="dashboard-row">
 
-  </main>
+        <!-- Gráfica de distribución por rol -->
+        <div class="card chart-card">
+          <h3 class="card-title">Distribución por rol</h3>
+          <div class="chart-bars">
+            <div *ngFor="let item of chartData" class="chart-row">
+              <span class="chart-label">{{ item.label }}</span>
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" [style.width.%]="item.pct"
+                     [style.background]="item.color"></div>
+              </div>
+              <span class="chart-val">{{ item.value }} ({{ item.pct }}%)</span>
+            </div>
+          </div>
+
+          <!-- Donut visual simple -->
+          <div class="donut-wrap">
+  <svg viewBox="0 0 100 100" class="donut-svg">
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#1e293b" stroke-width="18"/>
+
+    <ng-container *ngFor="let item of chartData; let i = index">
+      <circle cx="50" cy="50" r="40" fill="none"
+              [attr.stroke]="item.color"
+              stroke-width="18"
+              [attr.stroke-dashoffset]="getDashOffset(i)"
+              [attr.stroke-dashoffset]="getDashOffset(i)"
+              transform="rotate(-90 50 50)"/>
+    </ng-container>
+
+    <text x="50" y="54" text-anchor="middle" class="donut-label">
+      {{ kpis.totalUsers }}
+    </text>
+  </svg>
+  </div> <!-- chart-card -->
 </div>
-```
+
+        <!-- Estado del sistema -->
+        <div class="card system-card">
+          <h3 class="card-title">Estado del sistema</h3>
+          <div class="system-rows">
+            <div class="system-row">
+              <span class="sys-icon">🌐</span>
+              <span class="sys-name">API REST</span>
+              <span class="sys-badge" [class.ok]="kpis.apiStatus==='ok'" [class.err]="kpis.apiStatus!=='ok'">
+                {{ kpis.apiStatus === 'ok' ? '✓ Operativa' : '✗ Degradada' }}
+              </span>
+            </div>
+            <div class="system-row">
+              <span class="sys-icon">🗄️</span>
+              <span class="sys-name">PostgreSQL</span>
+              <span class="sys-badge" [class.ok]="kpis.dbStatus==='ok'" [class.err]="kpis.dbStatus!=='ok'">
+                {{ kpis.dbStatus === 'ok' ? '✓ Conectada' : '✗ Sin conexión' }}
+              </span>
+            </div>
+            <div class="system-row">
+              <span class="sys-icon">⏱️</span>
+              <span class="sys-name">Uptime del servidor</span>
+              <span class="sys-value">{{ kpis.uptime }}</span>
+            </div>
+            <div class="system-row">
+              <span class="sys-icon">🔐</span>
+              <span class="sys-name">Cuentas bloqueadas</span>
+              <span class="sys-value" [class.warn]="kpis.lockedUsers > 0">{{ kpis.lockedUsers }}</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm mt-12" (click)="loadKpis()">
+            🔄 Actualizar
+          </button>
+        </div>
+
+        <!-- Accesos rápidos -->
+        <div class="card actions-card">
+          <h3 class="card-title">Acciones rápidas</h3>
+          <div class="quick-actions">
+            <button class="quick-btn" (click)="setTab('usuarios'); openModal('create')">
+              <span class="qa-icon">➕</span>
+              <span>Crear tutor</span>
+            </button>
+            <button class="quick-btn" (click)="setTab('usuarios'); filterRole='child'; onFilterChange()">
+              <span class="qa-icon">🧒</span>
+              <span>Ver niños</span>
+            </button>
+            <button class="quick-btn warn" (click)="setTab('usuarios'); filterActive='false'; onFilterChange()">
+              <span class="qa-icon">🔒</span>
+              <span>Ver bloqueados</span>
+            </button>
+            <button class="quick-btn" (click)="setTab('auditoria')">
+              <span class="qa-icon">📋</span>
+              <span>Ver auditoría</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ TAB: USUARIOS ═══════════════════════════════════════════════════ -->
+    <section *ngIf="activeTab==='usuarios'" class="tab-content">
+
+      <!-- Toolbar -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" type="text"
+                   placeholder="Buscar por username o email..."
+                   [value]="searchTerm"
+                   (input)="onSearch($any($event.target).value)"/>
+          </div>
+
+          <select class="filter-select" [(ngModel)]="filterRole" (change)="onFilterChange()">
+            <option value="">Todos los roles</option>
+            <option value="guardian">Tutores</option>
+            <option value="child">Niños</option>
+            <option value="admin">Admins</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filterActive" (change)="onFilterChange()">
+            <option value="">Todos los estados</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos / Bloqueados</option>
+          </select>
+        </div>
+
+        <div class="toolbar-right">
+          <span class="total-badge">{{ totalUsers }} usuarios</span>
+          <button class="btn btn-primary" (click)="openModal('create')">
+            ➕ Nuevo tutor
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card table-card">
+        <div *ngIf="loading" class="table-loading">
+          <div class="spinner"></div>
+          <span>Cargando usuarios...</span>
+        </div>
+
+        <table *ngIf="!loading" class="data-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Intentos fallidos</th>
+              <th>Último acceso</th>
+              <th>Creado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users" [class.row-inactive]="!user.is_active"
+                [class.row-locked]="isLocked(user)">
+              <td>
+                <div class="user-cell">
+                  <div class="avatar-sm">{{ user.username.charAt(0).toUpperCase() }}</div>
+                  <div>
+                    <div class="username">{{ user.username }}</div>
+                    <div class="display-name" *ngIf="user.display_name || user.nickname">
+                      {{ user.display_name || user.nickname }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-muted">{{ user.email || '—' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+              <td>
+                <div class="status-cell">
+                  <span class="status-dot" [class.active]="user.is_active && !isLocked(user)"
+                        [class.locked]="isLocked(user)"
+                        [class.inactive]="!user.is_active"></span>
+                  <span>{{ isLocked(user) ? 'Bloqueado' : user.is_active ? 'Activo' : 'Inactivo' }}</span>
+                </div>
+              </td>
+              <td>
+                <span [class.text-danger]="user.failed_login_attempts >= 3">
+                  {{ user.failed_login_attempts }}
+                </span>
+              </td>
+              <td class="text-muted text-sm">{{ formatDate(user.last_login_at) }}</td>
+              <td class="text-muted text-sm">{{ formatDate(user.created_at) }}</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="Ver detalle" (click)="openModal('view', user)">👁</button>
+                  <button class="btn-icon" title="Editar" (click)="openModal('edit', user)"
+                          *ngIf="user.role !== 'admin' || currentUser?.role === 'admin'">✏️</button>
+                  <button class="btn-icon" title="Restablecer contraseña"
+                          (click)="openModal('reset-password', user)">🔑</button>
+                  <button class="btn-icon" [title]="user.is_active ? 'Desactivar' : 'Activar'"
+                          (click)="toggleStatus(user)">
+                    {{ user.is_active ? '🚫' : '✅' }}
+                  </button>
+                  <button class="btn-icon warn" title="Desbloquear" *ngIf="isLocked(user)"
+                          (click)="unlockUser(user)">🔓</button>
+                  <button class="btn-icon danger" title="Eliminar"
+                          (click)="openModal('delete', user)"
+                          *ngIf="user.account_id !== currentUser?.accountId">🗑</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="users.length === 0">
+              <td colspan="8" class="empty-row">
+                <div class="empty-state">
+                  <span class="empty-icon">🔍</span>
+                  <span>No se encontraron usuarios con los filtros aplicados</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="page-btn" (click)="goToPage(1)" [disabled]="currentPage===1">«</button>
+          <button class="page-btn" (click)="goToPage(currentPage-1)" [disabled]="currentPage===1">‹</button>
+          <button *ngFor="let p of pages" class="page-btn"
+                  [class.active]="p===currentPage" (click)="goToPage(p)">{{ p }}</button>
+          <button class="page-btn" (click)="goToPage(currentPage+1)" [disabled]="currentPage===totalPages">›</button>
+          <button class="page-btn" (click)="goToPage(totalPages)" [disabled]="currentPage===totalPages">»</button>
+          <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ TAB: AUDITORÍA ══════════════════════════════════════════════════ -->
+    <section *ngIf="activeTab==='auditoria'" class="tab-content">
+      <div class="card">
+        <div class="card-header-row">
+          <h3 class="card-title">Bitácora de eventos del sistema</h3>
+          <button class="btn btn-secondary btn-sm" (click)="loadAudit()">🔄 Actualizar</button>
+        </div>
+
+        <div *ngIf="loadingAudit" class="table-loading">
+          <div class="spinner"></div><span>Cargando auditoría...</span>
+        </div>
+
+        <table *ngIf="!loadingAudit" class="data-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Tipo</th>
+              <th>Actor</th>
+              <th>Descripción</th>
+              <th>IP</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of auditLog">
+              <td class="audit-icon">{{ getEventIcon(entry.event_type) }}</td>
+              <td>
+                <span class="badge badge-audit">{{ entry.event_type }}</span>
+              </td>
+              <td class="text-muted">{{ entry.actor_username || '—' }}</td>
+              <td>{{ entry.description }}</td>
+              <td class="text-muted text-sm">{{ entry.ip_address || '—' }}</td>
+              <td class="text-muted text-sm">{{ formatDate(entry.occurred_at) }}</td>
+            </tr>
+            <tr *ngIf="auditLog.length === 0">
+              <td colspan="6" class="empty-row">
+                <div class="empty-state">
+                  <span class="empty-icon">📋</span>
+                  <span>No hay registros de auditoría aún</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Paginación auditoría -->
+        <div class="pagination" *ngIf="auditTotalPages > 1">
+          <button class="page-btn" (click)="auditPage=auditPage-1; loadAudit()" [disabled]="auditPage===1">‹</button>
+          <span class="page-info">{{ auditPage }} / {{ auditTotalPages }}</span>
+          <button class="page-btn" (click)="auditPage=auditPage+1; loadAudit()" [disabled]="auditPage===auditTotalPages">›</button>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main-content -->
+</div><!-- /admin-shell -->
+
+<!-- ═══ MODALES ════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="modalMode" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- ── Ver detalle ── -->
+    <ng-container *ngIf="modalMode==='view' && selectedUser">
+      <div class="modal-header">
+        <h2>👁 Detalle del usuario</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body detail-grid">
+        <div class="detail-row"><span>ID</span><code>{{ selectedUser.account_id }}</code></div>
+        <div class="detail-row"><span>Username</span><b>{{ selectedUser.username }}</b></div>
+        <div class="detail-row"><span>Nombre</span><span>{{ selectedUser.display_name || selectedUser.nickname || '—' }}</span></div>
+        <div class="detail-row"><span>Email</span><span>{{ selectedUser.email || 'Sin email (niño)' }}</span></div>
+        <div class="detail-row"><span>Rol</span>
+          <span class="badge" [ngClass]="getRoleBadgeClass(selectedUser.role)">{{ getRoleLabel(selectedUser.role) }}</span>
+        </div>
+        <div class="detail-row"><span>Estado</span>
+          <span [class.text-success]="selectedUser.is_active" [class.text-danger]="!selectedUser.is_active">
+            {{ selectedUser.is_active ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+        <div class="detail-row" *ngIf="selectedUser.role==='child'">
+          <span>XP acumulado</span><span>{{ selectedUser.current_xp ?? 0 }} pts</span>
+        </div>
+        <div class="detail-row" *ngIf="selectedUser.role==='child'">
+          <span>Racha actual</span><span>{{ selectedUser.streak_days ?? 0 }} días</span>
+        </div>
+        <div class="detail-row"><span>Intentos fallidos</span>
+          <span [class.text-danger]="(selectedUser.failed_login_attempts || 0) >= 3">
+            {{ selectedUser.failed_login_attempts || 0 }}
+          </span>
+        </div>
+        <div class="detail-row"><span>Bloqueado hasta</span>
+          <span>{{ formatDate(selectedUser.locked_until) }}</span>
+        </div>
+        <div class="detail-row"><span>Último acceso</span><span>{{ formatDate(selectedUser.last_login_at) }}</span></div>
+        <div class="detail-row"><span>Creado</span><span>{{ formatDate(selectedUser.created_at) }}</span></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+        <button class="btn btn-primary" (click)="openModal('edit', selectedUser)">Editar</button>
+      </div>
+    </ng-container>
+
+    <!-- ── Crear tutor ── -->
+    <ng-container *ngIf="modalMode==='create'">
+      <div class="modal-header">
+        <h2>➕ Crear nuevo tutor</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error" *ngIf="modalError">{{ modalError }}</div>
+        <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+          <div class="field-group">
+            <label>Nombre de usuario *</label>
+            <input formControlName="username" placeholder="ej: tutor_maria"
+                   [class.error]="isInvalid(createForm,'username')"/>
+            <span class="field-error" *ngIf="isInvalid(createForm,'username')">
+              Mínimo 3 caracteres, solo letras, números, _ . -
+            </span>
+          </div>
+          <div class="field-group">
+            <label>Correo electrónico *</label>
+            <input formControlName="email" type="email" placeholder="correo@ejemplo.com"
+                   [class.error]="isInvalid(createForm,'email')"/>
+            <span class="field-error" *ngIf="isInvalid(createForm,'email')">Email inválido</span>
+          </div>
+          <div class="field-group">
+            <label>Nombre completo *</label>
+            <input formControlName="displayName" placeholder="ej: María García"
+                   [class.error]="isInvalid(createForm,'displayName')"/>
+            <span class="field-error" *ngIf="isInvalid(createForm,'displayName')">Mínimo 2 caracteres</span>
+          </div>
+          <div class="field-group">
+            <label>Contraseña *</label>
+            <input formControlName="password" type="password" placeholder="Mín. 10 chars, mayús, número, especial"
+                   [class.error]="isInvalid(createForm,'password')"/>
+            <span class="field-error" *ngIf="isInvalid(createForm,'password')">
+              Mínimo 10 caracteres con mayúscula, número y carácter especial (!&#64;#$%)
+            </span>
+          </div>
+          <div class="info-box">
+            ℹ️ Los perfiles de niños solo pueden crearse desde el panel del tutor, no desde aquí.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" [disabled]="modalLoading || createForm.invalid"
+                (click)="submitCreate()">
+          {{ modalLoading ? 'Creando...' : 'Crear tutor' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── Editar ── -->
+    <ng-container *ngIf="modalMode==='edit' && selectedUser">
+      <div class="modal-header">
+        <h2>✏️ Editar usuario</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error" *ngIf="modalError">{{ modalError }}</div>
+        <div class="user-summary">
+          <div class="avatar-md">{{ selectedUser.username.charAt(0).toUpperCase() }}</div>
+          <div>
+            <b>{{ selectedUser.username }}</b>
+            <span class="badge ml-8" [ngClass]="getRoleBadgeClass(selectedUser.role)">
+              {{ getRoleLabel(selectedUser.role) }}
+            </span>
+          </div>
+        </div>
+        <form [formGroup]="editForm">
+          <div class="field-group" *ngIf="selectedUser.role !== 'child'">
+            <label>Email</label>
+            <input formControlName="email" type="email"
+                   [class.error]="isInvalid(editForm,'email')"/>
+            <span class="field-error" *ngIf="isInvalid(editForm,'email')">Email inválido</span>
+          </div>
+          <div class="field-group" *ngIf="selectedUser.role !== 'child'">
+            <label>Nombre para mostrar</label>
+            <input formControlName="display_name"/>
+          </div>
+          <div class="field-group toggle-field">
+            <label>Cuenta activa</label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="is_active"/>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" [disabled]="modalLoading" (click)="submitEdit()">
+          {{ modalLoading ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── Resetear contraseña ── -->
+    <ng-container *ngIf="modalMode==='reset-password' && selectedUser">
+      <div class="modal-header">
+        <h2>🔑 Restablecer contraseña</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error" *ngIf="modalError">{{ modalError }}</div>
+        <p class="modal-desc">
+          Establecer nueva contraseña para <b>{{ selectedUser.username }}</b>.
+          Se registrará en la bitácora de auditoría.
+        </p>
+        <form [formGroup]="resetPasswordForm">
+          <div class="field-group">
+            <label>Nueva contraseña *</label>
+            <input formControlName="newPassword" type="password"
+                   placeholder="Mín. 10 chars, mayús, número, especial"
+                   [class.error]="isInvalid(resetPasswordForm,'newPassword')"/>
+            <span class="field-error" *ngIf="isInvalid(resetPasswordForm,'newPassword')">
+              Mínimo 10 caracteres con mayúscula, número y carácter especial
+            </span>
+          </div>
+          <div class="field-group">
+            <label>Confirmar contraseña *</label>
+            <input formControlName="confirm" type="password"
+                   [class.error]="resetPasswordForm.errors?.['mismatch'] && resetPasswordForm.get('confirm')?.touched"/>
+            <span class="field-error"
+                  *ngIf="resetPasswordForm.errors?.['mismatch'] && resetPasswordForm.get('confirm')?.touched">
+              Las contraseñas no coinciden
+            </span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-warning" [disabled]="modalLoading || resetPasswordForm.invalid"
+                (click)="submitResetPassword()">
+          {{ modalLoading ? 'Restableciendo...' : 'Restablecer contraseña' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── Eliminar ── -->
+    <ng-container *ngIf="modalMode==='delete' && selectedUser">
+      <div class="modal-header danger">
+        <h2>🗑 Eliminar usuario</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error" *ngIf="modalError">{{ modalError }}</div>
+        <div class="delete-confirm">
+          <div class="delete-icon">⚠️</div>
+          <p>¿Estás seguro de eliminar al usuario <b>{{ selectedUser.username }}</b>?</p>
+          <p class="text-muted text-sm">
+            Esta acción es <b>irreversible</b>. Se eliminarán todos sus datos asociados
+            (perfil, hábitos, retos y vínculos).
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-danger" [disabled]="modalLoading" (click)="confirmDelete()">
+          {{ modalLoading ? 'Eliminando...' : 'Sí, eliminar' }}
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>
+
+<!-- ═══ TOAST ══════════════════════════════════════════════════════════════════ -->
+<div class="toast" *ngIf="toast" [class]="'toast toast-'+toast.type">
+  {{ toast.msg }}
+</div>

@@ -31,12 +31,11 @@ export const routes: Routes = [
 
   // ── Rutas protegidas (requieren sesión activa) ────────────────────────────
 
-  // Panel
 {
   path: 'panel',
-  canActivate: [authGuard],
-  loadComponent: () =>
-    import('./panel/pages/panel/panel.component')
+  canActivate: [authGuard,],
+  data: { roles: ['admin'] },
+  loadComponent: () => import('./panel/pages/panel/panel.component')
     .then(m => m.PanelComponent),
 },
 
