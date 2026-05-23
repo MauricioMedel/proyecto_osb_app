@@ -16,7 +16,7 @@
       {{ errorMsg }}
     </div>
 
-    <form (ngSubmit)="register()">
+    <form #registerForm="ngForm" (ngSubmit)="register()">
 
       <!-- Usuario -->
       <input
@@ -26,7 +26,12 @@
         placeholder="Nombre de usuario"
         class="register-input"
         required
+        #usernameRef="ngModel"
       />
+
+      <div class="register-error" *ngIf="usernameRef.invalid && usernameRef.touched">
+        El nombre de usuario es obligatorio.
+      </div>
 
       <!-- Nombre completo -->
       <input
@@ -36,7 +41,12 @@
         placeholder="Nombre completo del tutor"
         class="register-input"
         required
+        #displayNameRef="ngModel"
       />
+
+      <div class="register-error" *ngIf="displayNameRef.invalid && displayNameRef.touched">
+        El nombre completo es obligatorio.
+      </div>
 
       <!-- Email -->
       <input
@@ -46,7 +56,21 @@
         placeholder="Correo electrónico"
         class="register-input"
         required
+        email
+        #emailRef="ngModel"
       />
+
+      <div class="register-error" *ngIf="emailRef.invalid && emailRef.touched">
+
+        <span *ngIf="emailRef.errors?.['required']">
+          El correo es obligatorio.
+        </span>
+
+        <span *ngIf="emailRef.errors?.['email']">
+          Ingresa un correo válido.
+        </span>
+
+      </div>
 
       <!-- Contraseña -->
       <input
@@ -56,28 +80,43 @@
         placeholder="Crear contraseña"
         class="register-input"
         required
+        minlength="10"
+        pattern="^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{10,}$"
+        #passwordRef="ngModel"
       />
+
+      <div class="register-error" *ngIf="passwordRef.invalid && passwordRef.touched">
+
+        <span *ngIf="passwordRef.errors?.['required']">
+          La contraseña es obligatoria.
+        </span>
+
+        <span *ngIf="passwordRef.errors?.['minlength']">
+          Debe tener al menos 10 caracteres.
+        </span>
+
+        <span *ngIf="passwordRef.errors?.['pattern']">
+          Debe incluir una mayúscula y un símbolo especial.
+        </span>
+
+      </div>
 
       <!-- Botón -->
       <button
         type="submit"
-        [disabled]="loading"
+        [disabled]="loading || registerForm.invalid"
         class="register-button"
       >
         {{ loading ? 'Creando cuenta...' : 'Registrarme como tutor' }}
       </button>
 
-
-       <p class="register-login">
-      ¿Ya tienes una cuenta?
-      <a (click)="goLogin()">Iniciar sesión</a>
-    </p>
-
+      <p class="register-login">
+        ¿Ya tienes una cuenta?
+        <a (click)="goLogin()">Iniciar sesión</a>
+      </p>
 
     </form>
 
-   
   </div>
 
-  
 </section>
