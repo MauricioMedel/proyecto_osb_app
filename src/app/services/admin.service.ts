@@ -78,25 +78,30 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   // ── KPIs ──────────────────────────────────────────────────────────────────
-  getKpis(): Observable<KpiData> {
-    return forkJoin({
-      stats:  this.http.get<any>(`${this.API}/admin/stats`).pipe(catchError(() => of(null))),
-      health: this.http.get<any>('http://localhost:3000/health').pipe(catchError(() => of({ status:'error', db:'error', uptime:'N/A' }))),
-    }).pipe(
-      map(({ stats, health }) => ({
-        totalUsers:     stats?.data?.total_users     ?? 0,
-        totalGuardians: stats?.data?.total_guardians ?? 0,
-        totalChildren:  stats?.data?.total_children  ?? 0,
-        totalAdmins:    stats?.data?.total_admins    ?? 0,
-        activeUsers:    stats?.data?.active_users    ?? 0,
-        lockedUsers:    stats?.data?.locked_users    ?? 0,
-        newThisWeek:    stats?.data?.new_this_week   ?? 0,
-        apiStatus:      health?.status  ?? 'error',
-        dbStatus:       health?.db      ?? 'error',
-        uptime:         health?.uptime  ?? 'N/A',
-      }))
-    );
-  }
+  // ── KPIs ──────────────────────────────────────────────────────────────────
+getKpis(): Observable<KpiData> {
+  const baseUrl = this.API.replace('/api/v1', '');
+
+  return forkJoin({
+    stats:  this.http.get<any>(`${this.API}/admin/stats`)
+              .pipe(catchError(() => of(null))),
+    health: this.http.get<any>(`${baseUrl}/health`)
+              .pipe(catchError(() => of({ status: 'error', db: 'error', uptime: 'N/A' }))),
+  }).pipe(
+    map(({ stats, health }) => ({
+      totalUsers:     stats?.data?.total_users     ?? 0,
+      totalGuardians: stats?.data?.total_guardians ?? 0,
+      totalChildren:  stats?.data?.total_children  ?? 0,
+      totalAdmins:    stats?.data?.total_admins    ?? 0,
+      activeUsers:    stats?.data?.active_users    ?? 0,
+      lockedUsers:    stats?.data?.locked_users    ?? 0,
+      newThisWeek:    stats?.data?.new_this_week   ?? 0,
+      apiStatus:      health?.status  ?? 'error',
+      dbStatus:       health?.db      ?? 'error',
+      uptime:         health?.uptime  ?? 'N/A',
+    }))
+  );
+}
 
   // ── CRUD de usuarios ──────────────────────────────────────────────────────
 
