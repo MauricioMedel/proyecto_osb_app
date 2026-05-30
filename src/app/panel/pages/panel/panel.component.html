@@ -46,9 +46,7 @@
         </button>
       </div>
 
-      <p *ngIf="loading" class="loading-text">
-        Cargando niños...
-      </p>
+      <p *ngIf="loading" class="loading-text">Cargando niños...</p>
 
       <div *ngIf="actionLoading" class="loading-message">
         Procesando solicitud...
@@ -88,13 +86,8 @@
           </div>
 
           <div class="child-actions">
-            <button class="edit-btn" (click)="openEdit(child)">
-              Editar
-            </button>
-
-            <button class="delete-btn" (click)="deleteChild(child)">
-              Eliminar
-            </button>
+            <button class="edit-btn" (click)="openEdit(child)">Editar</button>
+            <button class="delete-btn" (click)="deleteChild(child)">Eliminar</button>
           </div>
 
         </div>
@@ -154,9 +147,7 @@
       </select>
 
       <div class="modal-actions">
-        <button class="cancel-btn" (click)="closeEdit()">
-          Cancelar
-        </button>
+        <button class="cancel-btn" (click)="closeEdit()">Cancelar</button>
 
         <button
           class="primary-btn"

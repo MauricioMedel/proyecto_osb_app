@@ -12,6 +12,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 18px;
   box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
   margin-bottom: 28px;
 }
@@ -22,22 +23,20 @@
   gap: 12px;
 
   .logo {
-  width: 70px;
-  height: 70px;
-  border-radius: 0;
-  overflow: visible;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  img {
     width: 70px;
-    height: auto;
-    object-fit: contain;
-    display: block;
+    height: 70px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 70px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
   }
-}
 
   h2 {
     color: #1e3a8a;
@@ -61,6 +60,7 @@
   border-radius: 14px;
   font-weight: bold;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .welcome-card {
@@ -153,17 +153,6 @@
   }
 }
 
-@media (max-width: 900px) {
-  .menu-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .child-header {
-    flex-direction: column;
-    gap: 16px;
-  }
-}
-
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -187,11 +176,6 @@
     margin-top: 18px;
     color: #1e3a8a;
   }
-
-  p {
-    color: #64748b;
-    margin-bottom: 0;
-  }
 }
 
 .spinner {
@@ -204,7 +188,72 @@
   animation: spin 1s linear infinite;
 }
 
+@media (max-width: 1000px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .child-page {
+    padding: 18px;
+  }
+
+  .child-header {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .brand {
+    flex-direction: column;
+  }
+
+  .user-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .welcome-card {
+    padding: 32px 18px;
+
+    h1 {
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-card {
+    padding: 28px 20px;
+
+    h3 {
+      font-size: 24px;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
