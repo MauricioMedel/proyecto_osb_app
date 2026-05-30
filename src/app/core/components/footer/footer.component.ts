@@ -12,7 +12,7 @@ export class FooterComponent {
   year = new Date().getFullYear();
 
   members = [
-    'Mauricio Medel de jesus', 'David Flores Pozos','Maria Guadalupe Mendoza Zamudio'
+    'Mauricio Medel de jesus', 'David Flores Pozos','Sandra Yamileth Jiménez Asís', 'Miguel Angel Briones Villagrana'
   ];
 
   quickLinks = [

@@ -92,6 +92,51 @@ form {
   font-weight: 600;
 }
 
+/* Password input */
+
+.password-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 14px 55px 14px 16px;
+  margin-bottom: 0;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+
+  border: none;
+  background: transparent;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggle-password .material-icons {
+  font-size: 24px;
+  color: #64748b;
+  line-height: 1;
+  transition: 0.2s;
+}
+
+.toggle-password:hover .material-icons {
+  color: #2563eb;
+}
+
 .register-button {
   margin-top: 6px;
   width: 100%;

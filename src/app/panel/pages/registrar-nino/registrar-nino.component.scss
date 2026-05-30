@@ -141,3 +141,106 @@
     grid-template-columns: repeat(2, 90px);
   }
 }
+.field-error {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched {
+  border-color: #dc2626 !important;
+  background: #fff5f5 !important;
+}
+
+input.ng-valid.ng-touched,
+select.ng-valid.ng-touched {
+  border-color: #22c55e !important;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-card {
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  text-align: center;
+  min-width: 300px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  h3 {
+    margin-top: 18px;
+    color: #1e3a8a;
+  }
+
+  p {
+    color: #64748b;
+    margin-bottom: 0;
+  }
+}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  margin: auto;
+  border: 6px solid #dbeafe;
+  border-top: 6px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  width: 100%;
+  padding-right: 55px !important;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+
+  transform: translateY(-50%);
+
+  border: none;
+  background: transparent;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggle-password .material-icons {
+  font-size: 24px;
+  color: #64748b;
+  line-height: 1;
+  transition: .2s;
+}
+
+.toggle-password:hover .material-icons {
+  color: #2563eb;
+}

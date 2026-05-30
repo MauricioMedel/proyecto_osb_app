@@ -20,11 +20,16 @@ export class RegistroUsuarioComponent {
 
   loading = false;
   errorMsg = '';
+  showPassword = false;
 
   constructor(
     private auth: AuthService,
     private router: Router
   ) {}
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
 
   register(): void {
 
@@ -44,24 +49,16 @@ export class RegistroUsuarioComponent {
     }).subscribe({
 
       next: () => {
-
         this.loading = false;
-
         alert('Cuenta creada correctamente');
-
-        // redirige al login
         this.router.navigate(['/login']);
-
       },
 
       error: (err) => {
-
         this.loading = false;
-
         this.errorMsg =
           err.error?.message ||
           'No se pudo registrar el usuario';
-
       }
 
     });

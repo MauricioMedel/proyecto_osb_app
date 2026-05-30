@@ -30,12 +30,26 @@
       class="login-input"
     />
 
-    <input
-      [(ngModel)]="password"
-      type="password"
-      placeholder="Contraseña"
-      class="login-input"
-    />
+    <div class="password-container">
+
+  <input
+    [(ngModel)]="password"
+    [type]="showPassword ? 'text' : 'password'"
+    placeholder="Contraseña"
+    class="login-input password-input"
+  />
+
+  <button
+    type="button"
+    class="toggle-password"
+    (click)="togglePassword()"
+  >
+    <span class="material-icons">
+      {{ showPassword ? 'visibility_off' : 'visibility' }}
+    </span>
+  </button>
+
+</div>
 
     <button
       (click)="login()"

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-registrar-nino',
@@ -15,6 +16,7 @@ import { environment } from '../../../../environments/environment';
 export class RegistrarNinoComponent {
   loading = false;
   errorMessage = '';
+  showPassword = false;
 
   child = {
     username: '',
@@ -26,27 +28,43 @@ export class RegistrarNinoComponent {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {}
 
-  registrarNino() {
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  registrarNino(form: NgForm) {
     this.errorMessage = '';
 
-    if (!this.child.username || !this.child.password || !this.child.nickname || !this.child.ageRange) {
-      this.errorMessage = 'Completa todos los campos obligatorios.';
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      this.errorMessage = 'Revisa los campos marcados antes de continuar.';
       return;
     }
 
     this.loading = true;
 
-    this.http.post(`${environment.apiUrl}/children`, this.child).subscribe({
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    this.http.post(`${environment.apiUrl}/children`, this.child, { headers }).subscribe({
       next: () => {
         this.loading = false;
+        alert('Niño registrado correctamente.');
         this.router.navigate(['/panel']);
       },
       error: (error) => {
         this.loading = false;
-        this.errorMessage = error.error?.message || 'No se pudo registrar el niño.';
+        this.errorMessage =
+          error.error?.error?.message ||
+          error.error?.message ||
+          'No se pudo registrar el niño.';
       }
     });
   }

@@ -1,20 +1,44 @@
 <div class="register-child-page">
 
+  <!-- LOADER -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <h3>Registrando niño...</h3>
+      <p>Estamos creando su aventura saludable 🚀</p>
+    </div>
+  </div>
+
   <div class="top-bar">
-    <a routerLink="/panel" class="back-link">← Volver al panel</a>
+    <a routerLink="/panel" class="back-link">
+      ← Volver al panel
+    </a>
   </div>
 
   <section class="register-card">
+
     <div class="header">
       <div class="icon">👧🧒</div>
+
       <h1>Registrar niño</h1>
-      <p>Agrega un perfil infantil para comenzar a supervisar hábitos, retos y recompensas.</p>
+
+      <p>
+        Agrega un perfil infantil para comenzar a supervisar hábitos,
+        retos y recompensas.
+      </p>
     </div>
 
-    <form (ngSubmit)="registrarNino()" #childForm="ngForm" class="form">
+    <form
+      #childForm="ngForm"
+      (ngSubmit)="registrarNino(childForm)"
+      class="form"
+    >
 
+      <!-- USUARIO -->
       <div class="form-group">
+
         <label>Usuario del niño</label>
+
         <input
           type="text"
           name="username"
@@ -22,23 +46,84 @@
           placeholder="Ej. mateo08"
           required
           minlength="3"
+          pattern="^[a-zA-Z0-9_]+$"
+          #usernameRef="ngModel"
         />
+
+        <small
+          class="field-error"
+          *ngIf="usernameRef.invalid && usernameRef.touched"
+        >
+          <span *ngIf="usernameRef.errors?.['required']">
+            El usuario es obligatorio.
+          </span>
+
+          <span *ngIf="usernameRef.errors?.['minlength']">
+            Debe tener mínimo 3 caracteres.
+          </span>
+
+          <span *ngIf="usernameRef.errors?.['pattern']">
+            Solo letras, números o "_".
+          </span>
+        </small>
+
       </div>
 
+      <!-- CONTRASEÑA -->
       <div class="form-group">
+
         <label>Contraseña</label>
-        <input
-          type="password"
-          name="password"
-          [(ngModel)]="child.password"
-          placeholder="Mínimo 8 caracteres"
-          required
-          minlength="8"
-        />
+
+        <div class="password-container">
+
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="child.password"
+            placeholder="Mínimo 8 caracteres"
+            required
+            minlength="8"
+            pattern="^(?=.*[A-Z])(?=.*[0-9]).{8,}$"
+            #passwordRef="ngModel"
+            class="password-input"
+          />
+
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePassword()"
+          >
+            <span class="material-icons">
+              {{ showPassword ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+
+        </div>
+
+        <small
+          class="field-error"
+          *ngIf="passwordRef.invalid && passwordRef.touched"
+        >
+          <span *ngIf="passwordRef.errors?.['required']">
+            La contraseña es obligatoria.
+          </span>
+
+          <span *ngIf="passwordRef.errors?.['minlength']">
+            Debe tener mínimo 8 caracteres.
+          </span>
+
+          <span *ngIf="passwordRef.errors?.['pattern']">
+            Debe incluir una mayúscula y un número.
+          </span>
+        </small>
+
       </div>
 
+      <!-- APODO -->
       <div class="form-group">
+
         <label>Apodo</label>
+
         <input
           type="text"
           name="nickname"
@@ -46,27 +131,73 @@
           placeholder="Ej. Mateo"
           required
           minlength="2"
+          pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"
+          #nicknameRef="ngModel"
         />
+
+        <small
+          class="field-error"
+          *ngIf="nicknameRef.invalid && nicknameRef.touched"
+        >
+          <span *ngIf="nicknameRef.errors?.['required']">
+            El apodo es obligatorio.
+          </span>
+
+          <span *ngIf="nicknameRef.errors?.['minlength']">
+            Debe tener mínimo 2 caracteres.
+          </span>
+
+          <span *ngIf="nicknameRef.errors?.['pattern']">
+            Solo se permiten letras.
+          </span>
+        </small>
+
       </div>
 
+      <!-- EDAD -->
       <div class="form-group">
+
         <label>Rango de edad</label>
+
         <select
           name="ageRange"
           [(ngModel)]="child.ageRange"
           required
+          #ageRangeRef="ngModel"
         >
-          <option value="" disabled>Selecciona una edad</option>
-          <option value="6-8">6 a 8 años</option>
-          <option value="9-10">9 a 10 años</option>
-          <option value="11-12">11 a 12 años</option>
+          <option value="" disabled>
+            Selecciona una edad
+          </option>
+
+          <option value="6-8">
+            6 a 8 años
+          </option>
+
+          <option value="9-10">
+            9 a 10 años
+          </option>
+
+          <option value="11-12">
+            11 a 12 años
+          </option>
         </select>
+
+        <small
+          class="field-error"
+          *ngIf="ageRangeRef.invalid && ageRangeRef.touched"
+        >
+          Debes seleccionar una edad.
+        </small>
+
       </div>
 
+      <!-- AVATAR -->
       <div class="form-group full">
+
         <label>Avatar</label>
 
         <div class="avatar-grid">
+
           <button
             type="button"
             class="avatar-option"
@@ -102,18 +233,30 @@
           >
             ⭐
           </button>
+
         </div>
+
       </div>
 
-      <div *ngIf="errorMessage" class="error-message">
+      <!-- ERROR GENERAL -->
+      <div
+        *ngIf="errorMessage"
+        class="error-message"
+      >
         {{ errorMessage }}
       </div>
 
-      <button type="submit" class="submit-btn" [disabled]="loading">
+      <!-- BOTÓN -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loading || childForm.invalid"
+      >
         {{ loading ? 'Registrando...' : 'Registrar niño' }}
       </button>
 
     </form>
+
   </section>
 
 </div>

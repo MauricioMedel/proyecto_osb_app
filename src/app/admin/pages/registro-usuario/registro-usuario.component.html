@@ -80,17 +80,31 @@
         </span>
       </div>
 
-      <input
-        [(ngModel)]="password"
-        name="password"
-        type="password"
-        placeholder="Crear contraseña"
-        class="register-input"
-        required
-        minlength="10"
-        pattern="^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{10,}$"
-        #passwordRef="ngModel"
-      />
+      <div class="password-container">
+
+        <input
+          [(ngModel)]="password"
+          name="password"
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Crear contraseña"
+          class="register-input password-input"
+          required
+          minlength="10"
+          pattern="^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{10,}$"
+          #passwordRef="ngModel"
+        />
+
+        <button
+          type="button"
+          class="toggle-password"
+          (click)="togglePassword()"
+        >
+          <span class="material-icons">
+            {{ showPassword ? 'visibility_off' : 'visibility' }}
+          </span>
+        </button>
+
+      </div>
 
       <div class="register-error" *ngIf="passwordRef.invalid && passwordRef.touched">
         <span *ngIf="passwordRef.errors?.['required']">
