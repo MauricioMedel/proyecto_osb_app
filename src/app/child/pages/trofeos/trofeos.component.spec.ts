@@ -1,0 +1,23 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { TrofeosComponent } from './trofeos.component';
+
+describe('TrofeosComponent', () => {
+  let component: TrofeosComponent;
+  let fixture: ComponentFixture<TrofeosComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TrofeosComponent]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(TrofeosComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

@@ -1,24 +1,36 @@
-<section class="register-container">
+<section class="register-page">
+
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <h3>Creando cuenta...</h3>
+      <p>Estamos preparando el panel del tutor 👨‍👩‍👧</p>
+    </div>
+  </div>
+
+  <div class="bubble bubble-one"></div>
+  <div class="bubble bubble-two"></div>
+  <div class="bubble bubble-three"></div>
 
   <div class="register-card">
+
+    <div class="logo-box">
+      <img src="assets/images/logoo.png" alt="Logo ObesiApp">
+    </div>
 
     <h2 class="register-title">Crear cuenta de tutor</h2>
 
     <p class="register-subtitle">
-      Regístrate como tutor para comenzar a dar seguimiento al progreso
-      físico de tu hijo. Nuestra plataforma te permitirá registrar sus
-      actividades, monitorear su evolución y fomentar hábitos saludables
-      para prevenir la obesidad infantil.
+      Regístrate para dar seguimiento al progreso físico de tus niños,
+      monitorear su evolución y fomentar hábitos saludables.
     </p>
 
-    <!-- Error -->
     <div *ngIf="errorMsg" class="register-error">
       {{ errorMsg }}
     </div>
 
     <form #registerForm="ngForm" (ngSubmit)="register()">
 
-      <!-- Usuario -->
       <input
         [(ngModel)]="username"
         name="username"
@@ -33,7 +45,6 @@
         El nombre de usuario es obligatorio.
       </div>
 
-      <!-- Nombre completo -->
       <input
         [(ngModel)]="displayName"
         name="displayName"
@@ -48,7 +59,6 @@
         El nombre completo es obligatorio.
       </div>
 
-      <!-- Email -->
       <input
         [(ngModel)]="email"
         name="email"
@@ -61,7 +71,6 @@
       />
 
       <div class="register-error" *ngIf="emailRef.invalid && emailRef.touched">
-
         <span *ngIf="emailRef.errors?.['required']">
           El correo es obligatorio.
         </span>
@@ -69,10 +78,8 @@
         <span *ngIf="emailRef.errors?.['email']">
           Ingresa un correo válido.
         </span>
-
       </div>
 
-      <!-- Contraseña -->
       <input
         [(ngModel)]="password"
         name="password"
@@ -86,7 +93,6 @@
       />
 
       <div class="register-error" *ngIf="passwordRef.invalid && passwordRef.touched">
-
         <span *ngIf="passwordRef.errors?.['required']">
           La contraseña es obligatoria.
         </span>
@@ -98,10 +104,8 @@
         <span *ngIf="passwordRef.errors?.['pattern']">
           Debe incluir una mayúscula y un símbolo especial.
         </span>
-
       </div>
 
-      <!-- Botón -->
       <button
         type="submit"
         [disabled]="loading || registerForm.invalid"

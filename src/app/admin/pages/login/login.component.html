@@ -1,39 +1,59 @@
-<div class="login-container">
+<div class="login-page">
 
-  <h2> Iniciar Sesión</h2>
-
-  <div *ngIf="errorMsg" class="login-error">
-    {{ errorMsg }}
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <h3>Iniciando sesión...</h3>
+    </div>
   </div>
 
-  <input
-    [(ngModel)]="username"
-    placeholder="Usuario"
-    class="login-input"
-  />
+  <div class="bubble bubble-one"></div>
+  <div class="bubble bubble-two"></div>
+  <div class="bubble bubble-three"></div>
 
-  <input
-    [(ngModel)]="password"
-    type="password"
-    placeholder="Contraseña"
-    class="login-input"
-  />
+  <div class="login-container">
 
-  <button
-    (click)="login()"
-    [disabled]="loading"
-    class="login-button"
-  >
-    {{ loading ? 'Cargando...' : 'Entrar' }}
+    <div class="logo-box">
+<img src="assets/images/logoo.png" alt="Logo ObesiApp">
+    </div>
+
+    <h2>Iniciar Sesión</h2>
+    <p class="login-subtitle">Continúa tu aventura saludable</p>
+
+    <div *ngIf="errorMsg" class="login-error">
+      {{ errorMsg }}
+    </div>
+
+    <input
+      [(ngModel)]="username"
+      placeholder="Usuario"
+      class="login-input"
+    />
+
+    <input
+      [(ngModel)]="password"
+      type="password"
+      placeholder="Contraseña"
+      class="login-input"
+    />
+
+    <button
+      (click)="login()"
+      [disabled]="loading"
+      class="login-button"
+    >
+      {{ loading ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+    <p class="login-register">
+      ¿No tienes cuenta?
+      <a (click)="goRegister()">Regístrate aquí</a>
+    </p>
+
+  </div>
+
+  <button class="register-home" (click)="goHome()">
+    ← Volver al inicio
   </button>
-
-  <p class="login-register">
-  ¿No tienes cuenta?
-  <a (click)="goRegister()">Regístrate aquí</a>
-</p>
-
-<button class="register-home" (click)="goHome()">
-  ← Volver al inicio
-</button>
 
 </div>

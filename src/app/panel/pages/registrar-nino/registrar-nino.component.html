@@ -1,0 +1,119 @@
+<div class="register-child-page">
+
+  <div class="top-bar">
+    <a routerLink="/panel" class="back-link">← Volver al panel</a>
+  </div>
+
+  <section class="register-card">
+    <div class="header">
+      <div class="icon">👧🧒</div>
+      <h1>Registrar niño</h1>
+      <p>Agrega un perfil infantil para comenzar a supervisar hábitos, retos y recompensas.</p>
+    </div>
+
+    <form (ngSubmit)="registrarNino()" #childForm="ngForm" class="form">
+
+      <div class="form-group">
+        <label>Usuario del niño</label>
+        <input
+          type="text"
+          name="username"
+          [(ngModel)]="child.username"
+          placeholder="Ej. mateo08"
+          required
+          minlength="3"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="child.password"
+          placeholder="Mínimo 8 caracteres"
+          required
+          minlength="8"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Apodo</label>
+        <input
+          type="text"
+          name="nickname"
+          [(ngModel)]="child.nickname"
+          placeholder="Ej. Mateo"
+          required
+          minlength="2"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Rango de edad</label>
+        <select
+          name="ageRange"
+          [(ngModel)]="child.ageRange"
+          required
+        >
+          <option value="" disabled>Selecciona una edad</option>
+          <option value="6-8">6 a 8 años</option>
+          <option value="9-10">9 a 10 años</option>
+          <option value="11-12">11 a 12 años</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Avatar</label>
+
+        <div class="avatar-grid">
+          <button
+            type="button"
+            class="avatar-option"
+            [class.selected]="child.avatarCode === 'avatar_1'"
+            (click)="child.avatarCode = 'avatar_1'"
+          >
+            🧒
+          </button>
+
+          <button
+            type="button"
+            class="avatar-option"
+            [class.selected]="child.avatarCode === 'avatar_2'"
+            (click)="child.avatarCode = 'avatar_2'"
+          >
+            👧
+          </button>
+
+          <button
+            type="button"
+            class="avatar-option"
+            [class.selected]="child.avatarCode === 'avatar_3'"
+            (click)="child.avatarCode = 'avatar_3'"
+          >
+            🧢
+          </button>
+
+          <button
+            type="button"
+            class="avatar-option"
+            [class.selected]="child.avatarCode === 'avatar_4'"
+            (click)="child.avatarCode = 'avatar_4'"
+          >
+            ⭐
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="loading">
+        {{ loading ? 'Registrando...' : 'Registrar niño' }}
+      </button>
+
+    </form>
+  </section>
+
+</div>

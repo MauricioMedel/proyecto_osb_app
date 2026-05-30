@@ -31,14 +31,23 @@ export const routes: Routes = [
 
   // ── Rutas protegidas (requieren sesión activa) ────────────────────────────
 
+  //Tutor
 {
   path: 'panel',
   canActivate: [authGuard,],
-  data: { roles: ['admin'] },
+  data: { roles: ['guardian'] },
   loadComponent: () => import('./panel/pages/panel/panel.component')
     .then(m => m.PanelComponent),
 },
-
+{
+  path: 'panel/registrar-nino',
+  canActivate: [authGuard],
+  data: { roles: ['guardian'] },
+  loadComponent: () =>
+    import('./panel/pages/registrar-nino/registrar-nino.component')
+      .then(m => m.RegistrarNinoComponent),
+},
+//Niños
 {
   path: 'menu',
   canActivate: [authGuard],
@@ -46,7 +55,33 @@ export const routes: Routes = [
     import('./child/pages/menu/menu.component')
     .then(m => m.MenuComponent),
 },
+{
+  path: 'menu/jugar',
+  canActivate: [authGuard],
+  data: { roles: ['child'] },
+  loadComponent: () =>
+    import('./child/pages/jugar/jugar.component')
+      .then(m => m.JugarComponent),
+},
 
+{
+  path: 'menu/trofeos',
+  canActivate: [authGuard],
+  data: { roles: ['child'] },
+  loadComponent: () =>
+    import('./child/pages/trofeos/trofeos.component')
+      .then(m => m.TrofeosComponent),
+},
+
+{
+  path: 'menu/progreso',
+  canActivate: [authGuard],
+  data: { roles: ['child'] },
+  loadComponent: () =>
+    import('./child/pages/progreso/progreso.component')
+      .then(m => m.ProgresoComponent),
+},
+//Admin
 {
   path: 'administrador',
   canActivate: [authGuard],

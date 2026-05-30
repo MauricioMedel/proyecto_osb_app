@@ -43,7 +43,7 @@ export class LoginComponent {
 
         // 🔥 Obtener usuario desde el token
         const user = this.auth.getCurrentUser();
-
+console.log('USUARIO LOGUEADO:', user);
         // Limpiar campos
         this.username = '';
         this.password = '';
@@ -54,9 +54,9 @@ export class LoginComponent {
         if (user?.role === 'admin') {
           this.router.navigate(['/administrador']);
         } else if (user?.role === 'guardian') {
-          this.router.navigate(['/']); // puedes cambiar esto
+          this.router.navigate(['/panel']); // puedes cambiar esto
         } else if (user?.role === 'child') {
-          this.router.navigate(['/']); // puedes cambiar esto
+          this.router.navigate(['/menu']); // puedes cambiar esto
         } else {
           this.router.navigate(['/']);
         }

@@ -1,1 +1,81 @@
-<p>menu works!</p>
+<div class="child-page">
+<div class="loading-overlay" *ngIf="loggingOut">
+  <div class="loader-card">
+    <div class="spinner"></div>
+    <h3>Cerrando sesión...</h3>
+  </div>
+
+</div>
+  <header class="child-header">
+    <div class="brand">
+      <div class="logo">
+        <img src="assets/images/logoo.png" >
+      </div>
+      <h2>ObesiApp</h2>
+    </div>
+
+    <div class="user-actions">
+        <span>Hola, {{ childName }}! ⭐</span>
+      <button class="logout-btn" (click)="logout()">
+        Cerrar sesión
+      </button>
+    </div>
+  </header>
+
+  <section class="welcome-card">
+    <h1>¡Bienvenido a tu aventura! 👋</h1>
+    <p>
+      Explora las secciones, completa retos y gana recompensas saludables.
+    </p>
+  </section>
+
+  <section class="menu-grid">
+
+    <!-- JUGAR -->
+    <div class="menu-card blue">
+      <div class="icon">🎮</div>
+
+      <h3>¡A Jugar!</h3>
+
+      <p>
+        Completa desafíos divertidos sobre salud y movimiento.
+      </p>
+
+      <button routerLink="/menu/jugar">
+        Entrar
+      </button>
+    </div>
+
+    <!-- TROFEOS -->
+    <div class="menu-card yellow">
+      <div class="icon">🏆</div>
+
+      <h3>Mis Trofeos</h3>
+
+      <p>
+        Consulta tus premios, medallas y puntos ganados.
+      </p>
+
+      <button routerLink="/menu/trofeos">
+        Ver trofeos
+      </button>
+    </div>
+
+    <!-- PROGRESO -->
+    <div class="menu-card green">
+      <div class="icon">🚩</div>
+
+      <h3>Mi Camino Saludable</h3>
+
+      <p>
+        Revisa tu progreso y sigue avanzando cada día.
+      </p>
+
+      <button routerLink="/menu/progreso">
+        Ver progreso
+      </button>
+    </div>
+
+  </section>
+
+</div>

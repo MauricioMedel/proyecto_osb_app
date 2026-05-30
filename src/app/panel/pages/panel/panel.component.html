@@ -1,1 +1,172 @@
-<p>panel works!</p>
+<div class="guardian-page">
+
+  <header class="guardian-header">
+    <div>
+      <h1>Panel del Tutor</h1>
+      <p>Hola, {{ tutorName }} 👋 Supervisa el avance de tus niños.</p>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+  </header>
+
+  <section class="summary-grid">
+    <div class="summary-card blue">
+      <span>👧🧒</span>
+      <h3>Niños registrados</h3>
+      <p>{{ children.length }}</p>
+    </div>
+
+    <div class="summary-card green">
+      <span>🏆</span>
+      <h3>Retos completados</h3>
+      <p>0</p>
+    </div>
+
+    <div class="summary-card yellow">
+      <span>⭐</span>
+      <h3>Recompensas</h3>
+      <p>0</p>
+    </div>
+
+    <div class="summary-card purple">
+      <span>📊</span>
+      <h3>Actividad semanal</h3>
+      <p>0%</p>
+    </div>
+  </section>
+
+  <section class="main-content">
+
+    <div class="children-section">
+      <div class="section-header">
+        <h2>Mis niños</h2>
+
+        <button class="primary-btn" routerLink="/panel/registrar-nino">
+          + Registrar niño
+        </button>
+      </div>
+
+      <p *ngIf="loading" class="loading-text">
+        Cargando niños...
+      </p>
+
+      <div *ngIf="actionLoading" class="loading-message">
+        Procesando solicitud...
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="!loading && children.length === 0" class="empty-card">
+        <div class="empty-icon">👦</div>
+        <h3>Aún no tienes niños registrados</h3>
+        <p>Registra un niño para comenzar a dar seguimiento a sus hábitos saludables.</p>
+
+        <button class="primary-btn" routerLink="/panel/registrar-nino">
+          Registrar primer niño
+        </button>
+      </div>
+
+      <div *ngIf="!loading && children.length > 0" class="children-grid">
+        <div class="child-card" *ngFor="let child of children">
+
+          <div class="child-avatar">
+            {{ child.avatar_code === 'avatar_2' ? '👧' : '🧒' }}
+          </div>
+
+          <div class="child-info">
+            <h3>{{ child.nickname }}</h3>
+            <p>Edad: {{ child.age_range }} años</p>
+            <p>Nivel: {{ child.level_name || 'Inicial' }}</p>
+            <p>XP: {{ child.current_xp || 0 }}</p>
+            <p>Racha: {{ child.streak_days || 0 }} días</p>
+          </div>
+
+          <div class="child-actions">
+            <button class="edit-btn" (click)="openEdit(child)">
+              Editar
+            </button>
+
+            <button class="delete-btn" (click)="deleteChild(child)">
+              Eliminar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <aside class="tips-card">
+      <h2>Resumen del tutor</h2>
+
+      <p>
+        Desde este panel podrás registrar niños, revisar su progreso,
+        consultar hábitos, logros y tiempo de pantalla.
+      </p>
+
+      <div class="tip">
+        <span>💡</span>
+        <p>Motiva al niño a completar retos diarios.</p>
+      </div>
+
+      <div class="tip">
+        <span>🥦</span>
+        <p>Revisa sus hábitos de alimentación saludable.</p>
+      </div>
+
+      <div class="tip">
+        <span>🏃</span>
+        <p>Supervisa su actividad física semanal.</p>
+      </div>
+    </aside>
+
+  </section>
+
+  <div class="modal-backdrop" *ngIf="editingChild">
+    <div class="modal-card">
+      <h2>Editar niño</h2>
+
+      <label>Apodo</label>
+      <input
+        type="text"
+        [(ngModel)]="editingChild.nickname"
+        placeholder="Nombre o apodo"
+      />
+
+      <label>Rango de edad</label>
+      <select [(ngModel)]="editingChild.age_range">
+        <option value="6-8">6 a 8 años</option>
+        <option value="9-10">9 a 10 años</option>
+        <option value="11-12">11 a 12 años</option>
+      </select>
+
+      <label>Avatar</label>
+      <select [(ngModel)]="editingChild.avatar_code">
+        <option value="avatar_1">Niño 🧒</option>
+        <option value="avatar_2">Niña 👧</option>
+        <option value="avatar_3">Gorra 🧢</option>
+        <option value="avatar_4">Estrella ⭐</option>
+      </select>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeEdit()">
+          Cancelar
+        </button>
+
+        <button
+          class="primary-btn"
+          (click)="updateChild()"
+          [disabled]="actionLoading"
+        >
+          {{ actionLoading ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

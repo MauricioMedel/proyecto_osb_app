@@ -1,0 +1,134 @@
+<div class="game-page">
+
+  <header class="game-header">
+    <button routerLink="/menu">← Volver</button>
+
+    <div>
+      <h1>🎮 Mundo Saludable</h1>
+      <p>Hola {{ childName }}, desbloquea niveles y gana recompensas.</p>
+    </div>
+
+    <div class="points-box">
+      ⭐ Modo aventura
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="loading-card">
+    Cargando mapa de niveles...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-card">
+    {{ errorMessage }}
+  </div>
+
+  <section class="map-card" *ngIf="!loading">
+
+    <div class="map-background">
+      <div class="cloud cloud-one">☁️</div>
+      <div class="cloud cloud-two">☁️</div>
+      <div class="sun">☀️</div>
+
+      <div class="map-title">
+        <h2>Mapa de niveles</h2>
+        <p>Completa cada nivel para desbloquear el siguiente.</p>
+      </div>
+
+      <div class="path-line"></div>
+
+      <div
+        class="level-node"
+        *ngFor="let level of levels; let i = index"
+        [class.completed]="level.status === 'completed'"
+        [class.unlocked]="level.status === 'unlocked'"
+        [class.locked]="level.status === 'locked'"
+        [style.top.%]="getNodeTop(i)"
+        [style.left.%]="getNodeLeft(i)"
+        (click)="openLevel(level)"
+      >
+        <div class="node-circle">
+          <span *ngIf="level.status === 'completed'">✅</span>
+          <span *ngIf="level.status === 'unlocked'">{{ level.icon }}</span>
+          <span *ngIf="level.status === 'locked'">🔒</span>
+        </div>
+
+        <div class="node-label">
+          <strong>{{ level.title }}</strong>
+          <small>{{ level.points }} pts</small>
+        </div>
+      </div>
+
+      <div class="feedback" *ngIf="feedbackMessage && !selectedLevel">
+        {{ feedbackMessage }}
+      </div>
+    </div>
+
+  </section>
+
+  <div class="challenge-modal" *ngIf="selectedLevel">
+    <div class="challenge-card">
+
+      <button class="close-btn" (click)="closeChallenge()">✕</button>
+
+      <div class="level-badge">
+        {{ selectedLevel.icon }}
+      </div>
+
+      <h2>{{ selectedLevel.title }}</h2>
+      <p>{{ selectedLevel.description }}</p>
+
+      <div class="question-box">
+        <h3>{{ currentQuestion.text }}</h3>
+
+        <div class="answers-grid">
+          <button
+            class="answer-card"
+            *ngFor="let option of currentQuestion.options"
+            [class.selected]="selectedAnswer === option.label"
+            (click)="selectAnswer(option)"
+          >
+            <span>{{ option.icon }}</span>
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-feedback" *ngIf="feedbackMessage">
+        {{ feedbackMessage }}
+      </div>
+
+      <button
+        class="next-btn"
+        *ngIf="selectedLevel.status === 'completed'"
+        (click)="closeChallenge()"
+      >
+        Volver al mapa
+      </button>
+
+    </div>
+  </div>
+
+  <div class="trophy-overlay" *ngIf="showTrophyModal">
+    <div class="trophy-modal">
+
+      <div class="sparkles">
+        ✨ 🎉 ✨
+      </div>
+
+      <div class="trophy-icon">
+        {{ newTrophy.icon }}
+      </div>
+
+      <h2>¡Nuevo Trofeo!</h2>
+
+      <h3>{{ newTrophy.title }}</h3>
+
+      <p>{{ newTrophy.description }}</p>
+
+      <button class="trophy-btn" (click)="closeTrophyModal()">
+        Continuar aventura 🚀
+      </button>
+
+    </div>
+  </div>
+
+</div>
