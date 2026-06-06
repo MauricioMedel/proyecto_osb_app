@@ -23,7 +23,7 @@ export class NavbarComponent {
     { label: 'Cómo funciona', id: 'como-funciona' },
     { label: 'Beneficios', id: 'beneficios' },
     { label: 'Metodología', id: 'metodologia' },
-    { label: 'Descargar', id: 'descargar' },
+    { label: 'Información', id: 'descargar' },
   ];
 
   @HostListener('window:scroll')
