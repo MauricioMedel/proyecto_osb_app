@@ -30,6 +30,9 @@ export class PanelComponent implements OnInit {
 
   loading = true;
   actionLoading = false;
+  // 🌟 NUEVO: Variables de control para el modal de eliminación
+  showDeleteModal = false;
+  childToDelete: Child | null = null;
 
   errorMessage = '';
   successMessage = '';
@@ -116,30 +119,36 @@ export class PanelComponent implements OnInit {
 }
 
   deleteChild(child: Child) {
-    const confirmDelete = confirm(`¿Seguro que deseas eliminar a ${child.nickname}?`);
+    this.childToDelete = child;
+    this.showDeleteModal = true;
+  }
 
-    if (!confirmDelete) return;
+  // 🌟 NUEVO: Ejecuta la eliminación real cuando presionan "Sí, eliminar"
+  confirmarEliminar() {
+    if (!this.childToDelete) return;
 
+    this.showDeleteModal = false;
     this.actionLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
     this.http.delete<any>(
-      `${environment.apiUrl}/children/${child.child_id}`,
+      `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
       { headers: this.getHeaders() }
     ).subscribe({
       next: () => {
         this.actionLoading = false;
         this.successMessage = 'Niño eliminado correctamente.';
+        this.childToDelete = null;
         this.getChildren();
       },
       error: () => {
         this.actionLoading = false;
         this.errorMessage = 'No se pudo eliminar el niño.';
+        this.childToDelete = null;
       }
     });
   }
-
   logout() {
     this.auth.logout();
   }

@@ -160,4 +160,86 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" *ngIf="showDeleteModal" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  ">
+    <div class="modal-card" style="
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    ">
+      <div style="font-size: 3.5rem; margin-bottom: 15px;">⚠️</div>
+      
+      <h2 style="color: #2c3e50; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">¿Estás seguro?</h2>
+      
+      <p style="color: #666; margin: 0 0 25px 0; font-size: 0.95rem; line-height: 1.6;">
+        Estás a punto de eliminar el perfil de <strong>{{ childToDelete?.nickname }}</strong>.<br>
+        Esta acción borrará todo su progreso y retos completados de forma permanente.
+      </p>
+
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        
+        <button 
+          type="button"
+          style="
+            flex: 1;
+            max-width: 140px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+          "
+          onmouseover="this.style.background='#e2e8f0'"
+          onmouseout="this.style.background='#f1f5f9'"
+          (click)="showDeleteModal = false; childToDelete = null;"
+        >
+          Cancelar
+        </button>
+
+        <button 
+          type="button"
+          style="
+            flex: 1;
+            max-width: 140px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+          "
+          onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.25)';"
+          (click)="confirmarEliminar()"
+        >
+          Sí, eliminar
+        </button>
+
+      </div>
+    </div>
+  </div>
+
 </div>
