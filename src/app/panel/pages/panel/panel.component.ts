@@ -124,53 +124,37 @@ export class PanelComponent implements OnInit {
   });
 }
 
-deleteChild(child: Child) {
-  // 🔍 Esto nos revelará si se llama child_id, id, _id, o de otra forma:
-  console.log('Datos completos del niño seleccionado:', child);
+  deleteChild(child: Child) {
     this.childToDelete = child;
     this.showDeleteModal = true;
   }
 
+  // 🌟 NUEVO: Ejecuta la eliminación real cuando presionan "Sí, eliminar"
   confirmarEliminar() {
-  if (!this.childToDelete) return;
+    if (!this.childToDelete) return;
 
-  this.showDeleteModal = false;
-  this.actionLoading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
+    this.showDeleteModal = false;
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-  // 🌟 URL CORRECTA: Apunta directo a /:childId usando el método DELETE tal como dicta tu backend
-  this.http.delete<any>(
-    `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
-    { headers: this.getHeaders() }
-  ).subscribe({
-    next: () => {
-      this.actionLoading = false;
-      this.successMessage = 'Niño eliminado correctamente.';
-      this.childToDelete = null;
-      this.getChildren(); // Recarga instantáneamente la lista en pantalla
-
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
-    },
-    error: (err) => {
-      this.actionLoading = false;
-      this.childToDelete = null;
-      
-      // Mapeamos el error exacto que devuelva tu middleware en Express si algo falla en Render
-      this.errorMessage = 
-        err.error?.error?.message || 
-        err.error?.message || 
-        'No se pudo eliminar el niño.';
-
-      setTimeout(() => {
-        this.errorMessage = '';
-      }, 3000);
-    }
-  });
-}
-
+    this.http.delete<any>(
+      `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: () => {
+        this.actionLoading = false;
+        this.successMessage = 'Niño eliminado correctamente.';
+        this.childToDelete = null;
+        this.getChildren();
+      },
+      error: () => {
+        this.actionLoading = false;
+        this.errorMessage = 'No se pudo eliminar el niño.';
+        this.childToDelete = null;
+      }
+    });
+  }
   logout() {
     this.auth.logout();
   }
