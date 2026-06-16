@@ -137,4 +137,62 @@
 
   </div>
 
+  <div class="modal-backdrop" *ngIf="showSuccessModal" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  ">
+    <div class="modal-card" style="
+      background: #ffffff;
+      padding: 35px 30px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    ">
+      <div style="font-size: 3.8rem; margin-bottom: 15px;">🥳</div>
+      
+      <h2 style="color: #2c3e50; font-size: 1.6rem; font-weight: 700; margin-bottom: 10px;">¡Cuenta Creada!</h2>
+      
+      <p style="color: #666; margin: 0 0 25px 0; font-size: 0.95rem; line-height: 1.6;">
+        Tu perfil de tutor ha sido configurado con éxito. <br>
+        ¡Ya puedes ingresar para comenzar a gestionar la aventura saludable de tus niños! 🧒👧
+      </p>
+
+      <div style="display: flex; justify-content: center;">
+        <button 
+          type="button"
+          style="
+            width: 100%; 
+            max-width: 220px; 
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+          "
+          onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 18px rgba(59, 130, 246, 0.5)';"
+          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 14px rgba(59, 130, 246, 0.35)';"
+          (click)="irAlLogin()"
+        >
+          Continuar al Login
+        </button>
+      </div>
+    </div>
+  </div>
+
 </section>

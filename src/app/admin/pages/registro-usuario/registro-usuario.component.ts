@@ -21,6 +21,7 @@ export class RegistroUsuarioComponent {
   loading = false;
   errorMsg = '';
   showPassword = false;
+  showSuccessModal = false;
 
   constructor(
     private auth: AuthService,
@@ -32,7 +33,6 @@ export class RegistroUsuarioComponent {
   }
 
   register(): void {
-
     if (!this.username || !this.email || !this.password) {
       this.errorMsg = 'Completa todos los campos obligatorios';
       return;
@@ -41,28 +41,32 @@ export class RegistroUsuarioComponent {
     this.loading = true;
     this.errorMsg = '';
 
+    // Tu lógica original intacta tal como te funcionaba antes:
     this.auth.register({
       username: this.username,
       email: this.email,
       password: this.password,
       displayName: this.displayName
     }).subscribe({
-
       next: () => {
         this.loading = false;
-        alert('Cuenta creada correctamente');
-        this.router.navigate(['/login']);
+        
+        // 🌟 2. CAMBIO AQUÍ: Activamos el modal en vez del alert()
+        this.showSuccessModal = true;
       },
-
       error: (err) => {
         this.loading = false;
         this.errorMsg =
           err.error?.message ||
           'No se pudo registrar el usuario';
       }
-
     });
+  }
 
+  // 🌟 3. Agrega este método para manejar la redirección al presionar el botón del modal
+  irAlLogin(): void {
+    this.showSuccessModal = false;
+    this.router.navigate(['/login']);
   }
 
   goLogin(): void {
