@@ -83,35 +83,37 @@ export class PanelComponent implements OnInit {
   }
 
   updateChild() {
-    if (!this.editingChild) return;
+  if (!this.editingChild) return;
 
-    this.actionLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+  this.actionLoading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
 
-    const body = {
-      nickname: this.editingChild.nickname,
-      ageRange: this.editingChild.age_range,
-      avatarCode: this.editingChild.avatar_code
-    };
+  // 1. Corregimos las propiedades usando snake_case (con guiones bajos)
+  const body = {
+    nickname: this.editingChild.nickname,
+    age_range: this.editingChild.age_range,   // Cambiado a age_range
+    avatar_code: this.editingChild.avatar_code // Cambiado a avatar_code
+  };
 
-    this.http.put<any>(
-      `${environment.apiUrl}/children/${this.editingChild.child_id}`,
-      body,
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: () => {
-        this.actionLoading = false;
-        this.successMessage = 'Niño actualizado correctamente.';
-        this.editingChild = null;
-        this.getChildren();
-      },
-      error: () => {
-        this.actionLoading = false;
-        this.errorMessage = 'No se pudo actualizar el niño.';
-      }
-    });
-  }
+  // 2. CAMBIAMOS http.put POR http.patch para que coincida con Express
+  this.http.patch<any>(
+    `${environment.apiUrl}/children/${this.editingChild.child_id}`,
+    body,
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: () => {
+      this.actionLoading = false;
+      this.successMessage = 'Niño actualizado correctamente.';
+      this.editingChild = null;
+      this.getChildren();
+    },
+    error: () => {
+      this.actionLoading = false;
+      this.errorMessage = 'No se pudo actualizar el niño.';
+    }
+  });
+}
 
   deleteChild(child: Child) {
     const confirmDelete = confirm(`¿Seguro que deseas eliminar a ${child.nickname}?`);
