@@ -49,15 +49,23 @@ export class RegistrarNinoComponent {
     this.loading = true;
 
     const token = this.auth.getToken();
-
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
 
-    this.http.post(`${environment.apiUrl}/children`, this.child, { headers }).subscribe({
+    // 🌟 MAPEO DE BODY: Forzamos snake_case para que tu backend lo reciba sin problemas
+    const body = {
+      username: this.child.username,
+      password: this.child.password,
+      nickname: this.child.nickname,
+      age_range: this.child.ageRange,     // Convertido a age_range 
+      avatar_code: this.child.avatarCode  // Convertido a avatar_code
+    };
+
+    this.http.post(`${environment.apiUrl}/children`, body, { headers }).subscribe({
       next: () => {
         this.loading = false;
-        // 🌟 CAMBIO: Activamos el modal en vez del alert molesto
+        // 🌟 Activamos el modal y se oculta automáticamente el spinner de carga de fondo
         this.showSuccessModal = true;
       },
       error: (error) => {
@@ -70,7 +78,6 @@ export class RegistrarNinoComponent {
     });
   }
 
-  // 🌟 Método para manejar la redirección al cerrar el modal exitoso
   irAlPanel() {
     this.showSuccessModal = false;
     this.router.navigate(['/panel']);

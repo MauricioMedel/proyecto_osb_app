@@ -1,6 +1,5 @@
 <div class="register-child-page">
 
-  <!-- LOADER -->
   <div class="loading-overlay" *ngIf="loading">
     <div class="loader-card">
       <div class="spinner"></div>
@@ -19,9 +18,7 @@
 
     <div class="header">
       <div class="icon">👧🧒</div>
-
       <h1>Registrar niño</h1>
-
       <p>
         Agrega un perfil infantil para comenzar a supervisar hábitos,
         retos y recompensas.
@@ -34,11 +31,8 @@
       class="form"
     >
 
-      <!-- USUARIO -->
       <div class="form-group">
-
         <label>Usuario del niño</label>
-
         <input
           type="text"
           name="username"
@@ -57,25 +51,18 @@
           <span *ngIf="usernameRef.errors?.['required']">
             El usuario es obligatorio.
           </span>
-
           <span *ngIf="usernameRef.errors?.['minlength']">
             Debe tener mínimo 3 caracteres.
           </span>
-
           <span *ngIf="usernameRef.errors?.['pattern']">
             Solo letras, números o "_".
           </span>
         </small>
-
       </div>
 
-      <!-- CONTRASEÑA -->
       <div class="form-group">
-
         <label>Contraseña</label>
-
         <div class="password-container">
-
           <input
             [type]="showPassword ? 'text' : 'password'"
             name="password"
@@ -97,7 +84,6 @@
               {{ showPassword ? 'visibility_off' : 'visibility' }}
             </span>
           </button>
-
         </div>
 
         <small
@@ -107,23 +93,17 @@
           <span *ngIf="passwordRef.errors?.['required']">
             La contraseña es obligatoria.
           </span>
-
           <span *ngIf="passwordRef.errors?.['minlength']">
             Debe tener mínimo 8 caracteres.
           </span>
-
           <span *ngIf="passwordRef.errors?.['pattern']">
             Debe incluir una mayúscula y un número.
           </span>
         </small>
-
       </div>
 
-      <!-- APODO -->
       <div class="form-group">
-
         <label>Apodo</label>
-
         <input
           type="text"
           name="nickname"
@@ -142,23 +122,17 @@
           <span *ngIf="nicknameRef.errors?.['required']">
             El apodo es obligatorio.
           </span>
-
           <span *ngIf="nicknameRef.errors?.['minlength']">
             Debe tener mínimo 2 caracteres.
           </span>
-
           <span *ngIf="nicknameRef.errors?.['pattern']">
             Solo se permiten letras.
           </span>
         </small>
-
       </div>
 
-      <!-- EDAD -->
       <div class="form-group">
-
         <label>Rango de edad</label>
-
         <select
           name="ageRange"
           [(ngModel)]="child.ageRange"
@@ -168,18 +142,9 @@
           <option value="" disabled>
             Selecciona una edad
           </option>
-
-          <option value="6-8">
-            6 a 8 años
-          </option>
-
-          <option value="9-10">
-            9 a 10 años
-          </option>
-
-          <option value="11-12">
-            11 a 12 años
-          </option>
+          <option value="6-8">6 a 8 años</option>
+          <option value="9-10">9 a 10 años</option>
+          <option value="11-12">11 a 12 años</option>
         </select>
 
         <small
@@ -188,16 +153,11 @@
         >
           Debes seleccionar una edad.
         </small>
-
       </div>
 
-      <!-- AVATAR -->
       <div class="form-group full">
-
         <label>Avatar</label>
-
         <div class="avatar-grid">
-
           <button
             type="button"
             class="avatar-option"
@@ -206,7 +166,6 @@
           >
             🧒
           </button>
-
           <button
             type="button"
             class="avatar-option"
@@ -215,7 +174,6 @@
           >
             👧
           </button>
-
           <button
             type="button"
             class="avatar-option"
@@ -224,7 +182,6 @@
           >
             🧢
           </button>
-
           <button
             type="button"
             class="avatar-option"
@@ -233,20 +190,13 @@
           >
             ⭐
           </button>
-
         </div>
-
       </div>
 
-      <!-- ERROR GENERAL -->
-      <div
-        *ngIf="errorMessage"
-        class="error-message"
-      >
+      <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
 
-      <!-- BOTÓN -->
       <button
         type="submit"
         class="submit-btn"
@@ -256,46 +206,64 @@
       </button>
 
     </form>
-
   </section>
 
-  <div class="modal-backdrop" *ngIf="showSuccessModal">
-  <div class="modal-card" style="text-align: center; padding: 30px;">
-    <div style="font-size: 3.5rem; margin-bottom: 15px; animation: bounce 1.2s infinite;">🎉</div>
-    
-    <h2>¡Registro Completado!</h2>
-    
-    <p style="color: #666; margin: 15px 0 25px 0; font-size: 0.95rem; line-height: 1.5;">
-      El perfil de <strong>{{ child.nickname || 'tu niño' }}</strong> ha sido creado con éxito.<br>
-      ¡Ya puedes comenzar a monitorear sus hábitos y retos! 🚀
-    </p>
+  <div class="modal-backdrop" *ngIf="showSuccessModal" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  ">
+    <div class="modal-card" style="
+      background: #ffffff;
+      padding: 35px 30px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    ">
+      <div style="font-size: 3.8rem; margin-bottom: 15px;">🎉</div>
+      
+      <h2 style="color: #2c3e50; font-size: 1.6rem; font-weight: 700; margin-bottom: 10px;">¡Registro Completado!</h2>
+      
+      <p style="color: #666; margin: 0 0 25px 0; font-size: 0.95rem; line-height: 1.6;">
+        El perfil de <strong>{{ child.nickname || 'tu niño' }}</strong> ha sido creado con éxito.<br>
+        ¡Ya puedes comenzar a monitorear sus hábitos y retos! 🚀
+      </p>
 
-    <div style="display: flex; justify-content: center;">
-      <button 
-  class="submit-btn" 
-  style="
-    width: 100%; 
-    max-width: 200px; 
-    margin-top: 10px;
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-  "
-  onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.45)';"
-  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)';"
-  (click)="irAlPanel()"
->
-  Ir al Panel
-</button>
+      <div style="display: flex; justify-content: center;">
+        <button 
+          type="button"
+          style="
+            width: 100%; 
+            max-width: 220px; 
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+          "
+          onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 18px rgba(59, 130, 246, 0.5)';"
+          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 14px rgba(59, 130, 246, 0.35)';"
+          (click)="irAlPanel()"
+        >
+          Ir al Panel
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
 </div>
