@@ -110,10 +110,16 @@ export class PanelComponent implements OnInit {
       this.successMessage = 'Niño actualizado correctamente.';
       this.editingChild = null;
       this.getChildren();
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
     },
     error: () => {
       this.actionLoading = false;
       this.errorMessage = 'No se pudo actualizar el niño.';
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 3000);
     }
   });
 }
