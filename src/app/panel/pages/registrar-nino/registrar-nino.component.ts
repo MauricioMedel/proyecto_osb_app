@@ -17,6 +17,7 @@ export class RegistrarNinoComponent {
   loading = false;
   errorMessage = '';
   showPassword = false;
+  showSuccessModal = false;
 
   child = {
     username: '',
@@ -56,8 +57,8 @@ export class RegistrarNinoComponent {
     this.http.post(`${environment.apiUrl}/children`, this.child, { headers }).subscribe({
       next: () => {
         this.loading = false;
-        alert('Niño registrado correctamente.');
-        this.router.navigate(['/panel']);
+        // 🌟 CAMBIO: Activamos el modal en vez del alert molesto
+        this.showSuccessModal = true;
       },
       error: (error) => {
         this.loading = false;
@@ -67,5 +68,11 @@ export class RegistrarNinoComponent {
           'No se pudo registrar el niño.';
       }
     });
+  }
+
+  // 🌟 Método para manejar la redirección al cerrar el modal exitoso
+  irAlPanel() {
+    this.showSuccessModal = false;
+    this.router.navigate(['/panel']);
   }
 }
