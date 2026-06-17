@@ -390,3 +390,94 @@
     }
   }
 }
+
+.health-btn {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.ml-card {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 2px solid #dbeafe;
+}
+
+.ml-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  span {
+    font-size: 22px;
+  }
+
+  h4 {
+    margin: 0;
+    color: #1e3a8a;
+    font-size: 16px;
+  }
+}
+
+.ml-info {
+  p {
+    margin: 5px 0;
+    color: #475569;
+  }
+}
+
+.ml-empty {
+  margin-top: 12px;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.risk-low {
+  color: #16a34a;
+  font-weight: 900;
+}
+
+.risk-medium {
+  color: #f59e0b;
+  font-weight: 900;
+}
+
+.risk-high {
+  color: #dc2626;
+  font-weight: 900;
+}
+
+.risk-none {
+  color: #64748b;
+  font-weight: 900;
+}
+
+.ai-tip {
+  background: #eff6ff;
+}
+
+.modal-description {
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 700px) {
+  .child-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}

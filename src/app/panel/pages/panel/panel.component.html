@@ -83,9 +83,40 @@
             <p>Nivel: {{ child.level_name || 'Inicial' }}</p>
             <p>XP: {{ child.current_xp || 0 }}</p>
             <p>Racha: {{ child.streak_days || 0 }} días</p>
+
+            <div class="ml-card" *ngIf="latestMetrics[child.child_id] as metric">
+              <div class="ml-header">
+                <span>🤖</span>
+                <h4>Evaluación con IA</h4>
+              </div>
+
+              <div class="ml-info">
+                <p><strong>IMC:</strong> {{ metric.bmi }}</p>
+
+                <p>
+                  <strong>Riesgo:</strong>
+                  <span [ngClass]="getRiskClass(metric.risk_level)">
+                    {{ metric.risk_level | titlecase }}
+                  </span>
+                </p>
+
+                <p>
+                  <strong>Confianza:</strong>
+                  {{ (+metric.prediction_confidence * 100) | number:'1.0-0' }}%
+                </p>
+              </div>
+            </div>
+
+            <div class="ml-empty" *ngIf="!latestMetrics[child.child_id]">
+              🤖 Sin evaluación de salud registrada.
+            </div>
           </div>
 
           <div class="child-actions">
+            <button class="health-btn" (click)="openHealthForm(child)">
+              Evaluar salud
+            </button>
+
             <button class="edit-btn" (click)="openEdit(child)">Editar</button>
             <button class="delete-btn" (click)="deleteChild(child)">Eliminar</button>
           </div>
@@ -116,6 +147,11 @@
         <span>🏃</span>
         <p>Supervisa su actividad física semanal.</p>
       </div>
+
+      <div class="tip ai-tip">
+        <span>🤖</span>
+        <p>Utiliza la evaluación IA para conocer el riesgo estimado.</p>
+      </div>
     </aside>
 
   </section>
@@ -125,11 +161,7 @@
       <h2>Editar niño</h2>
 
       <label>Apodo</label>
-      <input
-        type="text"
-        [(ngModel)]="editingChild.nickname"
-        placeholder="Nombre o apodo"
-      />
+      <input type="text" [(ngModel)]="editingChild.nickname" placeholder="Nombre o apodo" />
 
       <label>Rango de edad</label>
       <select [(ngModel)]="editingChild.age_range">
@@ -149,97 +181,76 @@
       <div class="modal-actions">
         <button class="cancel-btn" (click)="closeEdit()">Cancelar</button>
 
-        <button
-          class="primary-btn"
-          (click)="updateChild()"
-          [disabled]="actionLoading"
-        >
+        <button class="primary-btn" (click)="updateChild()" [disabled]="actionLoading">
           {{ actionLoading ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
     </div>
   </div>
 
-  <div class="modal-backdrop" *ngIf="showDeleteModal" style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  ">
-    <div class="modal-card" style="
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-    ">
-      <div style="font-size: 3.5rem; margin-bottom: 15px;">⚠️</div>
-      
-      <h2 style="color: #2c3e50; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">¿Estás seguro?</h2>
-      
-      <p style="color: #666; margin: 0 0 25px 0; font-size: 0.95rem; line-height: 1.6;">
-        Estás a punto de eliminar el perfil de <strong>{{ childToDelete?.nickname }}</strong>.<br>
-        Esta acción borrará todo su progreso y retos completados de forma permanente.
+  <div class="modal-backdrop" *ngIf="showDeleteModal">
+    <div class="modal-card delete-modal">
+      <div class="warning-icon">⚠️</div>
+
+      <h2>¿Estás seguro?</h2>
+
+      <p>
+        Estás a punto de eliminar el perfil de
+        <strong>{{ childToDelete?.nickname }}</strong>.
+        Esta acción borrará su progreso de forma permanente.
       </p>
 
-      <div style="display: flex; gap: 12px; justify-content: center;">
-        
-        <button 
-          type="button"
-          style="
-            flex: 1;
-            max-width: 140px;
-            background: #f1f5f9;
-            color: #64748b;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-          "
-          onmouseover="this.style.background='#e2e8f0'"
-          onmouseout="this.style.background='#f1f5f9'"
-          (click)="showDeleteModal = false; childToDelete = null;"
-        >
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" (click)="showDeleteModal = false; childToDelete = null">
           Cancelar
         </button>
 
-        <button 
-          type="button"
-          style="
-            flex: 1;
-            max-width: 140px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-            transition: transform 0.2s, box-shadow 0.2s;
-          "
-          onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
-          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.25)';"
-          (click)="confirmarEliminar()"
-        >
+        <button type="button" class="confirm-delete-btn" (click)="confirmarEliminar()">
           Sí, eliminar
         </button>
-
       </div>
     </div>
   </div>
+
+  <div class="modal-backdrop" *ngIf="selectedChild">
+    <div class="modal-card">
+      <h2>Evaluación de salud con IA</h2>
+
+      <p class="modal-description">
+        Registra los datos físicos de
+        <strong>{{ selectedChild.nickname }}</strong>
+        para estimar su nivel de riesgo mediante Random Forest.
+      </p>
+
+      <label>Edad</label>
+      <input type="number" [(ngModel)]="healthForm.age" placeholder="Ej. 11" />
+
+      <label>Género</label>
+      <select [(ngModel)]="healthForm.gender">
+        <option value="">Selecciona una opción</option>
+        <option value="female">Femenino</option>
+        <option value="male">Masculino</option>
+      </select>
+
+      <label>Peso en kg</label>
+      <input type="number" [(ngModel)]="healthForm.weight_kg" placeholder="Ej. 55" />
+
+      <label>Estatura en cm</label>
+      <input type="number" [(ngModel)]="healthForm.height_cm" placeholder="Ej. 145" />
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeHealthForm()">
+          Cancelar
+        </button>
+
+        <button class="primary-btn" (click)="submitHealthMetric()" [disabled]="healthLoading">
+          {{ healthLoading ? 'Evaluando...' : 'Evaluar con IA' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
 
 </div>
