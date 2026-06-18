@@ -86,8 +86,8 @@
 
             <div class="ml-card" *ngIf="latestMetrics[child.child_id] as metric">
               <div class="ml-header">
-                <span>🤖</span>
-                <h4>Evaluación con IA</h4>
+                <span></span>
+                <h4>Evaluación de salud</h4>
               </div>
 
               <div class="ml-info">
@@ -108,7 +108,7 @@
             </div>
 
             <div class="ml-empty" *ngIf="!latestMetrics[child.child_id]">
-              🤖 Sin evaluación de salud registrada.
+               Sin evaluación de salud registrada.
             </div>
           </div>
 
@@ -214,7 +214,7 @@
 
   <div class="modal-backdrop" *ngIf="selectedChild">
     <div class="modal-card">
-      <h2>Evaluación de salud con IA</h2>
+      <h2>Evaluación de salud</h2>
 
       <p class="modal-description">
         Registra los datos físicos de
@@ -249,4 +249,5 @@
       </div>
     </div>
   </div>
+
 </div>
