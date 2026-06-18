@@ -17,6 +17,26 @@ interface Child {
   level_number: number;
 }
 
+interface HealthMetric {
+  metric_id: string;
+  child_id: string;
+  age: number;
+  gender: string;
+  weight_kg: string;
+  height_cm: string;
+  bmi: string;
+  risk_level: 'bajo' | 'medio' | 'alto';
+  prediction_confidence: string;
+  created_at: string;
+}
+
+interface HealthForm {
+  age: number | null;
+  gender: string;
+  weight_kg: number | null;
+  height_cm: number | null;
+}
+
 @Component({
   selector: 'app-panel',
   standalone: true,
@@ -30,17 +50,30 @@ export class PanelComponent implements OnInit {
 
   loading = true;
   actionLoading = false;
+  healthLoading = false;
 
+  showDeleteModal = false;
+  childToDelete: Child | null = null;
   errorMessage = '';
   successMessage = '';
 
   editingChild: Child | null = null;
+  selectedChild: Child | null = null;
+
+  latestMetrics: Record<string, HealthMetric | null> = {};
+
+  healthForm: HealthForm = {
+    age: null,
+    gender: '',
+    weight_kg: null,
+    height_cm: null
+  };
 
   constructor(
     private router: Router,
     private http: HttpClient,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const user = this.auth.getCurrentUser();
@@ -66,6 +99,10 @@ export class PanelComponent implements OnInit {
       next: (res) => {
         this.children = res.data || [];
         this.loading = false;
+
+        this.children.forEach(child => {
+          this.getLatestHealthMetric(child.child_id);
+        });
       },
       error: () => {
         this.loading = false;
@@ -89,13 +126,15 @@ export class PanelComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
+    // 1. Corregimos las propiedades usando snake_case (con guiones bajos)
     const body = {
       nickname: this.editingChild.nickname,
-      ageRange: this.editingChild.age_range,
-      avatarCode: this.editingChild.avatar_code
+      age_range: this.editingChild.age_range,   // Cambiado a age_range
+      avatar_code: this.editingChild.avatar_code // Cambiado a avatar_code
     };
 
-    this.http.put<any>(
+    // 2. CAMBIAMOS http.put POR http.patch para que coincida con Express
+    this.http.patch<any>(
       `${environment.apiUrl}/children/${this.editingChild.child_id}`,
       body,
       { headers: this.getHeaders() }
@@ -105,37 +144,145 @@ export class PanelComponent implements OnInit {
         this.successMessage = 'Niño actualizado correctamente.';
         this.editingChild = null;
         this.getChildren();
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
       },
       error: () => {
         this.actionLoading = false;
         this.errorMessage = 'No se pudo actualizar el niño.';
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 3000);
       }
     });
   }
 
   deleteChild(child: Child) {
-    const confirmDelete = confirm(`¿Seguro que deseas eliminar a ${child.nickname}?`);
+  this.childToDelete = child;
+  this.showDeleteModal = true;
+}
 
-    if (!confirmDelete) return;
+  // 🌟 NUEVO: Ejecuta la eliminación real cuando presionan "Sí, eliminar"
+  confirmarEliminar() {
 
-    this.actionLoading = true;
+  if (!this.childToDelete) return;
+
+  this.showDeleteModal = false;
+  this.actionLoading = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  this.http.delete<any>(
+    `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: () => {
+      this.actionLoading = false;
+      this.successMessage = 'Niño eliminado correctamente.';
+      this.childToDelete = null;
+      this.getChildren();
+    },
+    error: () => {
+      this.actionLoading = false;
+      this.errorMessage = 'No se pudo eliminar el niño.';
+      this.childToDelete = null;
+    }
+  });
+}
+
+  openHealthForm(child: Child) {
+    this.selectedChild = child;
+
+    const ageNumber = Number((child.age_range || '').split('-')[0]);
+
+    this.healthForm = {
+      age: ageNumber || null,
+      gender: '',
+      weight_kg: null,
+      height_cm: null
+    };
+
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  closeHealthForm() {
+    this.selectedChild = null;
+
+    this.healthForm = {
+      age: null,
+      gender: '',
+      weight_kg: null,
+      height_cm: null
+    };
+  }
+
+  submitHealthMetric() {
+    if (!this.selectedChild) return;
+
+    if (
+      !this.healthForm.age ||
+      !this.healthForm.gender ||
+      !this.healthForm.weight_kg ||
+      !this.healthForm.height_cm
+    ) {
+      this.errorMessage = 'Completa edad, género, peso y estatura.';
+      return;
+    }
+
+    this.healthLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.http.delete<any>(
-      `${environment.apiUrl}/children/${child.child_id}`,
+    this.http.post<any>(
+      `${environment.apiUrl}/ml/children/${this.selectedChild.child_id}/health-metrics`,
+      this.healthForm,
       { headers: this.getHeaders() }
     ).subscribe({
-      next: () => {
-        this.actionLoading = false;
-        this.successMessage = 'Niño eliminado correctamente.';
-        this.getChildren();
+      next: (res) => {
+        this.healthLoading = false;
+        this.successMessage = 'Evaluación de salud registrada correctamente.';
+
+        const metric = res.data?.metric;
+        if (metric) {
+          this.latestMetrics[this.selectedChild!.child_id] = metric;
+        }
+
+        this.closeHealthForm();
       },
       error: () => {
-        this.actionLoading = false;
-        this.errorMessage = 'No se pudo eliminar el niño.';
+        this.healthLoading = false;
+        this.errorMessage = 'No se pudo registrar la evaluación de salud.';
       }
     });
+  }
+
+  getLatestHealthMetric(childId: string) {
+    this.http.get<any>(
+      `${environment.apiUrl}/ml/children/${childId}/health-metrics/latest`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: (res) => {
+        this.latestMetrics[childId] = res.data || null;
+      },
+      error: () => {
+        this.latestMetrics[childId] = null;
+      }
+    });
+  }
+
+  getRiskClass(risk?: string) {
+    switch (risk) {
+      case 'bajo':
+        return 'risk-low';
+      case 'medio':
+        return 'risk-medium';
+      case 'alto':
+        return 'risk-high';
+      default:
+        return 'risk-none';
+    }
   }
 
   logout() {

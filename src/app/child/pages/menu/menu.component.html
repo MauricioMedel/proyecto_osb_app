@@ -12,65 +12,61 @@
       <div class="logo">
         <img src="assets/images/logoo.png" alt="Logo ObesiApp">
       </div>
-
       <h2>ObesiApp</h2>
     </div>
 
     <div class="user-actions">
       <span>Hola, {{ childName }}! ⭐</span>
-
       <button class="logout-btn" (click)="logout()">
         Cerrar sesión
       </button>
     </div>
   </header>
 
-  <section class="welcome-card">
-    <h1>¡Bienvenido a tu aventura! 👋</h1>
-
-    <p>
-      Explora las secciones, completa retos y gana recompensas saludables.
-    </p>
-  </section>
-
-  <section class="menu-grid">
-
-    <div class="menu-card blue">
-      <div class="icon">🎮</div>
-
-      <h3>¡A Jugar!</h3>
-
+  <!-- CAMBIO AQUÍ: En lugar de *ngIf, usamos [class.hidden] para ocultarlo sin destruir el espacio bruscamente -->
+  <div [class.hidden]="outlet.isActivated">
+    
+    <section class="welcome-card">
+      <h1>¡Bienvenido a tu aventura! 👋</h1>
       <p>
-        Completa desafíos divertidos sobre salud y movimiento.
+        Explora las secciones, completa retos y gana recompensas saludables.
       </p>
+    </section>
 
-      <button routerLink="/menu/jugar">Entrar</button>
-    </div>
+    <section class="menu-grid">
 
-    <div class="menu-card yellow">
-      <div class="icon">🏆</div>
+      <div class="menu-card blue">
+        <div class="icon">🎮</div>
+        <h3>¡A Jugar!</h3>
+        <p>
+          Completa desafíos divertidos sobre salud y movimiento.
+        </p>
+        <button routerLink="/menu/jugar">Entrar</button>
+      </div>
 
-      <h3>Mis Trofeos</h3>
+      <div class="menu-card yellow">
+        <div class="icon">🏆</div>
+        <h3>Mis Trofeos</h3>
+        <p>
+          Consulta tus premios, medallas y puntos ganados.
+        </p>
+        <button routerLink="/menu/trofeos">Ver trofeos</button>
+      </div>
 
-      <p>
-        Consulta tus premios, medallas y puntos ganados.
-      </p>
+      <div class="menu-card green">
+        <div class="icon">🚩</div>
+        <h3>Mi Camino Saludable</h3>
+        <p>
+          Revisa tu progreso y sigue avanzando cada día.
+        </p>
+        <button routerLink="/menu/progreso">Ver progreso</button>
+      </div>
 
-      <button routerLink="/menu/trofeos">Ver trofeos</button>
-    </div>
+    </section>
 
-    <div class="menu-card green">
-      <div class="icon">🚩</div>
+  </div>
 
-      <h3>Mi Camino Saludable</h3>
-
-      <p>
-        Revisa tu progreso y sigue avanzando cada día.
-      </p>
-
-      <button routerLink="/menu/progreso">Ver progreso</button>
-    </div>
-
-  </section>
+  <!-- El router-outlet se queda igual abajo -->
+  <router-outlet #outlet="outlet"></router-outlet>
 
 </div>
