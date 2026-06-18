@@ -65,47 +65,112 @@
   </section>
 
   <div class="challenge-modal" *ngIf="selectedLevel">
-    <div class="challenge-card">
 
-      <button class="close-btn" (click)="closeChallenge()">✕</button>
+  <div class="challenge-card">
 
-      <div class="level-badge">
-        {{ selectedLevel.icon }}
+    <button
+      class="close-btn"
+      (click)="closeChallenge()"
+    >
+      ✕
+    </button>
+
+    <div class="level-badge">
+      {{ selectedLevel.icon }}
+    </div>
+
+    <h2>
+      {{ selectedLevel.title }}
+    </h2>
+
+    <p>
+      {{ selectedLevel.description }}
+    </p>
+
+    <div
+      *ngIf="loadingQuiz"
+      class="question-box"
+    >
+      <h3>
+        🤖 Generando preguntas...
+      </h3>
+    </div>
+
+    <div
+      *ngIf="!loadingQuiz && currentQuestion && !quizFinished"
+      class="question-box"
+    >
+
+      <h3>
+        Pregunta
+        {{ currentQuestionIndex + 1 }}
+        de
+        {{ quiz.length }}
+      </h3>
+
+      <h2>
+        {{ currentQuestion.question }}
+      </h2>
+
+      <div class="answers-grid">
+
+        <button
+          class="answer-card"
+          *ngFor="let option of currentQuestion.options"
+          [class.selected]="selectedAnswer === option"
+          (click)="selectAnswer(option)"
+        >
+          {{ option }}
+        </button>
+
       </div>
 
-      <h2>{{ selectedLevel.title }}</h2>
-      <p>{{ selectedLevel.description }}</p>
+    </div>
 
-      <div class="question-box">
-        <h3>{{ currentQuestion.text }}</h3>
+    <div
+      *ngIf="quizFinished"
+      class="question-box result-box"
+    >
 
-        <div class="answers-grid">
-          <button
-            class="answer-card"
-            *ngFor="let option of currentQuestion.options"
-            [class.selected]="selectedAnswer === option.label"
-            (click)="selectAnswer(option)"
-          >
-            <span>{{ option.icon }}</span>
-            {{ option.label }}
-          </button>
-        </div>
-      </div>
+      <h2>
+        🎉 ¡Quiz completado!
+      </h2>
 
-      <div class="modal-feedback" *ngIf="feedbackMessage">
-        {{ feedbackMessage }}
-      </div>
+      <h3>
+        Resultado Final
+      </h3>
+
+      <p>
+        Respuestas correctas:
+        {{ score }}
+        de
+        {{ quiz.length }}
+      </p>
+
+      <p>
+        Porcentaje:
+        {{ (score / quiz.length) * 100 | number:'1.0-0' }}%
+      </p>
 
       <button
         class="next-btn"
-        *ngIf="selectedLevel.status === 'completed'"
         (click)="closeChallenge()"
       >
         Volver al mapa
       </button>
 
     </div>
+
+    <div
+      class="modal-feedback"
+      *ngIf="feedbackMessage && !quizFinished"
+    >
+      {{ feedbackMessage }}
+    </div>
+
   </div>
+
+</div>
 
   <div class="trophy-overlay" *ngIf="showTrophyModal">
     <div class="trophy-modal">
