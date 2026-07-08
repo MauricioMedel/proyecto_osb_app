@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 export class ProgresoComponent implements OnInit {
   // Con agua
   aguaActual = 0;
-  aguaMeta = 1;
+  aguaMeta = 8;
   aguaHabitId = '';
 
   // Con comida
