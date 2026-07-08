@@ -103,24 +103,52 @@
         <h2>Metas saludables 🎯</h2>
 
         <div class="goal-item">
-          <span>💧 Agua</span>
-          <strong>4 / 6 vasos</strong>
+        <span>
+        💧 Agua
+        </span>
+      <strong>
+        {{aguaActual}} / {{aguaMeta}} vasos
+      </strong>
+        <button (click)="sumarAgua()">
+        +
+        </button>
+        </div>
+        <div class="goal-item">
+        <div>
+          <span>🥦 Comida </span>
+          <strong>{{comidaActual}} / {{comidaMeta}} porciones</strong>
         </div>
 
-        <div class="goal-item">
-          <span>🥦 Comida sana</span>
-          <strong>2 / 3 comidas</strong>
-        </div>
+        <button class="plus-btn" (click)="sumarComida()">+</button>
+      </div>
 
         <div class="goal-item">
-          <span>😴 Sueño</span>
-          <strong>8 horas</strong>
+          <div>
+            <span>😴 Sueño</span>
+            <strong>{{suenoActual}} / {{suenoMeta}} horas</strong>
+          </div>
+
+          <button class="plus-btn" (click)="sumarSueno()">+</button>
         </div>
 
         <div class="goal-item">
           <span>🔥 Racha</span>
           <strong>7 días</strong>
         </div>
+        <div class="ai-card">
+  <h2>🤖 Análisis Inteligente</h2>
+  <p>Conoce tu patrón saludable del día.</p>
+
+  <button (click)="analizarPatronIA()" [class.loading]="analizandoIA">
+    {{ analizandoIA ? 'Analizando...' : 'Analizar patrón IA' }}
+  </button>
+</div>
+
+<div class="ai-result" *ngIf="mlResult">
+  <h3>Resultado IA</h3>
+  <p>Cluster: <strong>{{ mlResult.cluster_id }}</strong></p>
+  <p>{{ mlResult.message }}</p>
+</div>
       </div>
 
     </div>

@@ -269,4 +269,37 @@
     gap: 16px;
     align-items: flex-start;
   }
+
+  .goal-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:12px 0;
+}
+
+.goal-item div{
+    display:flex;
+    flex-direction:column;
+}
+
+.plus-btn{
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:50%;
+    background:#4CAF50;
+    color:#fff;
+    font-size:24px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.plus-btn:hover{
+    transform:scale(1.08);
+}
+
+.plus-btn:active{
+    transform:scale(.95);
+}
 }
