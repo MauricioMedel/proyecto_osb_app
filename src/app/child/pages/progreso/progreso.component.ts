@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 export class ProgresoComponent implements OnInit {
   // Con agua
   aguaActual = 0;
-  aguaMeta = 8;
+  aguaMeta = 1;
   aguaHabitId = '';
 
   // Con comida
@@ -53,17 +53,20 @@ export class ProgresoComponent implements OnInit {
 
       this.mlService.getDailySummary(user.childId).subscribe({
 
-      next:(res:any)=>{
+next:(res:any)=>{
 
-        console.log("========== DAILY SUMMARY ==========");
-        console.log(res);
-        console.log("DATA:", res.data);
-        console.log("SUMMARY ID:", res.data?.summary_id);
-        console.log("===================================");
+  console.log("========== DAILY SUMMARY ==========");
+  console.log(res);
+  console.log("DATA:", res.data);
+  console.log("SUMMARY ID:", res.data?.summary_id);
+  console.log("===================================");
 
-        this.summaryId = res.data?.summary_id ?? '';
 
-      },
+  this.dailySummary = res.data;
+
+  this.summaryId = res.data?.summary_id ?? '';
+
+},
 
       error:(err)=>{
 
@@ -148,7 +151,7 @@ export class ProgresoComponent implements OnInit {
 
     const body = {
       habitId: this.aguaHabitId,
-      logDate: new Date().toISOString().substring(0, 10),
+      logDate: this.obtenerFechaActual(),
       valueAchieved: this.aguaActual,
       isCompleted: this.aguaActual >= this.aguaMeta,
       source: "manual"
@@ -181,7 +184,7 @@ export class ProgresoComponent implements OnInit {
 
     const body = {
       habitId: this.comidaHabitId,
-      logDate: new Date().toISOString().substring(0, 10),
+      logDate: this.obtenerFechaActual(),
       valueAchieved: this.comidaActual,
       isCompleted: this.comidaActual >= this.comidaMeta,
       source: "manual"
@@ -214,7 +217,7 @@ export class ProgresoComponent implements OnInit {
 
     const body = {
       habitId: this.suenoHabitId,
-      logDate: new Date().toISOString().substring(0, 10),
+      logDate: this.obtenerFechaActual(),
       valueAchieved: this.suenoActual,
       isCompleted: this.suenoActual >= this.suenoMeta,
       source: "manual"
