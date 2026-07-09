@@ -109,8 +109,8 @@
       <strong>
         {{aguaActual}} / {{aguaMeta}} vasos
       </strong>
-        <button (click)="sumarAgua()">
-        +
+        <button class="plus-btn" (click)="sumarAgua()">
+          +
         </button>
         </div>
         <div class="goal-item">
@@ -131,24 +131,47 @@
           <button class="plus-btn" (click)="sumarSueno()">+</button>
         </div>
 
-        <div class="goal-item">
-          <span>🔥 Racha</span>
-          <strong>7 días</strong>
-        </div>
         <div class="ai-card">
-  <h2>🤖 Análisis Inteligente</h2>
-  <p>Conoce tu patrón saludable del día.</p>
 
-  <button (click)="analizarPatronIA()" [class.loading]="analizandoIA">
-    {{ analizandoIA ? 'Analizando...' : 'Analizar patrón IA' }}
-  </button>
-</div>
+            <div class="ai-header">
+              <span class="ai-icon">🤖</span>
 
-<div class="ai-result" *ngIf="mlResult">
-  <h3>Resultado IA</h3>
-  <p>Cluster: <strong>{{ mlResult.cluster_id }}</strong></p>
-  <p>{{ mlResult.message }}</p>
-</div>
+              <div>
+                <h2>Análisis Inteligente</h2>
+                <p>Conoce tu patrón saludable del día.</p>
+              </div>
+            </div>
+
+            <button
+              class="ai-btn"
+              (click)="analizarPatronIA()"
+              [disabled]="analizandoIA">
+
+              <span *ngIf="!analizandoIA">
+                ✨ Analizar patrón IA
+              </span>
+
+              <span *ngIf="analizandoIA">
+                ⏳ Analizando...
+              </span>
+
+            </button>
+
+          </div>
+
+          <div class="ai-result" *ngIf="mlResult">
+
+            <h3>🧠 Resultado IA</h3>
+
+            <div class="cluster">
+                Cluster {{mlResult.cluster_id}}
+            </div>
+
+            <p>
+                {{mlResult.message}}
+            </p>
+
+          </div>
       </div>
 
     </div>

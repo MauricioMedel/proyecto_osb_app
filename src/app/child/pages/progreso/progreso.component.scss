@@ -303,3 +303,128 @@
     transform:scale(.95);
 }
 }
+.ai-card{
+    margin-top:20px;
+    background:#fff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 12px 28px rgba(15,23,42,.08);
+}
+
+.ai-header{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.ai-icon{
+    width:55px;
+    height:55px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    background:linear-gradient(135deg,#2563eb,#60a5fa);
+    color:#fff;
+}
+
+.ai-header h2{
+    margin:0;
+    color:#1e3a8a;
+}
+
+.ai-header p{
+    margin-top:4px;
+    color:#64748b;
+}
+
+.ai-btn{
+    width:100%;
+    border:none;
+    border-radius:18px;
+    padding:16px;
+    cursor:pointer;
+    color:white;
+    font-size:17px;
+    font-weight:700;
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    transition:.25s;
+}
+
+.ai-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(37,99,235,.25);
+}
+
+.ai-btn:disabled{
+    background:#94a3b8;
+    cursor:not-allowed;
+}
+
+.ai-result{
+    margin-top:18px;
+    background:linear-gradient(135deg,#eef6ff,#f8fbff);
+    border:2px solid #bfdbfe;
+    border-radius:22px;
+    padding:20px;
+}
+
+.ai-result h3{
+    margin:0 0 12px;
+    color:#1e3a8a;
+}
+
+.cluster{
+    display:inline-block;
+    padding:8px 18px;
+    border-radius:30px;
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.ai-result p{
+    margin:0;
+    color:#334155;
+    line-height:1.6;
+}
+
+.plus-btn{
+    width:46px;
+    height:46px;
+
+    border:none;
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:28px;
+    font-weight:700;
+    color:#fff;
+
+    cursor:pointer;
+
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+
+    box-shadow:0 8px 18px rgba(37,99,235,.35);
+
+    transition:all .25s ease;
+}
+
+.plus-btn:hover{
+    transform:translateY(-3px) scale(1.08);
+    box-shadow:0 14px 24px rgba(37,99,235,.45);
+}
+
+.plus-btn:active{
+    transform:scale(.92);
+}
+
+.plus-btn:focus{
+    outline:none;
+}
