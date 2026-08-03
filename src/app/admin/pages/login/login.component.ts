@@ -46,7 +46,6 @@ export class LoginComponent {
 
         // 🔥 Obtener usuario desde el token
         const user = this.auth.getCurrentUser();
-console.log('USUARIO LOGUEADO:', user);
         // Limpiar campos
         this.username = '';
         this.password = '';

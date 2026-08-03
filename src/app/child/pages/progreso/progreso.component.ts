@@ -44,7 +44,6 @@ export class ProgresoComponent implements OnInit {
 
   ngOnInit() {
     const user = this.auth.getCurrentUser();
-    console.log("USUARIO LOGIN:", user);
 
     this.cargarHabitos();
     this.validarNuevoDia();
@@ -54,12 +53,6 @@ export class ProgresoComponent implements OnInit {
       this.mlService.getDailySummary(user.childId).subscribe({
 
 next:(res:any)=>{
-
-  console.log("========== DAILY SUMMARY ==========");
-  console.log(res);
-  console.log("DATA:", res.data);
-  console.log("SUMMARY ID:", res.data?.summary_id);
-  console.log("===================================");
 
 
   this.dailySummary = res.data;
@@ -80,7 +73,6 @@ next:(res:any)=>{
 }
 
     this.habitService.getCatalog().subscribe((response: any) => {
-      console.log("CATALOGO:", response);
       const catalog = response.data || response;
 
       const agua = catalog.find((h: any) => h.name.trim().toLowerCase() === "beber agua");
@@ -102,9 +94,6 @@ next:(res:any)=>{
         this.suenoMeta = Math.round(Number(sueno.target_value));
       }
 
-      console.log("Agua:", agua);
-      console.log("Comida:", comida);
-      console.log("Sueño:", sueno);
     });
   }
 
@@ -117,7 +106,6 @@ next:(res:any)=>{
   console.log("Cargando hábitos del día:", today);
 
   this.habitService.getHabits(user.childId, today).subscribe((response: any) => {
-    console.log("HÁBITOS DEL DÍA:", response.data);
     const habits = response.data || [];
 
     const agua = habits.find((h: any) => h.habit_name === "Beber agua");
@@ -174,9 +162,7 @@ next:(res:any)=>{
 
       }else{
 
-      console.log(
-      "Meta de comida alcanzada"
-      );
+   
 
       return;
 
@@ -190,7 +176,6 @@ next:(res:any)=>{
       source: "manual"
     };
 
-    console.log("ENVIANDO COMIDA:", body);
     this.habitService.saveHabit(user.childId, body).subscribe({
       next: (res) => console.log("COMIDA GUARDADA", res),
       error: (err) => console.error("ERROR GUARDANDO COMIDA", err)
@@ -223,7 +208,6 @@ next:(res:any)=>{
       source: "manual"
     };
 
-    console.log("ENVIANDO SUEÑO:", body);
     this.habitService.saveHabit(user.childId, body).subscribe({
       next: (res) => console.log("SUEÑO GUARDADO", res),
       error: (err) => console.error("ERROR GUARDANDO SUEÑO", err)
@@ -251,7 +235,6 @@ next:(res:any)=>{
 
   this.mlService.analyzePattern(this.summaryId, datos).subscribe({
     next: (res: any) => {
-      console.log("RESULTADO IA", res);
       this.mlResult = res.data;
       this.analizandoIA = false;
     },
