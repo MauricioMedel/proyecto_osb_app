@@ -7,6 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 
 interface Level {
   id: string;
+  levelNumber: number;
   title: string;
   description: string;
   status: 'completed' | 'unlocked' | 'locked';
@@ -40,16 +41,17 @@ export class JugarComponent implements OnInit {
 
   selectedLevel: Level | null = null;
   selectedAnswer = '';
+  isAnswerRevealed = false; // Bloquea clics múltiples mientras muestra si es correcto/incorrecto
 
   quiz: QuizQuestion[] = [];
   currentQuestionIndex = 0;
   score = 0;
   quizFinished = false;
+  passedLevel = false;
 
   selectedTopic = 'nutrition';
 
   showTrophyModal = false;
-
   newTrophy = {
     title: '',
     description: '',
@@ -65,9 +67,7 @@ export class JugarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-
     const user = this.auth.getCurrentUser();
-
     this.childName = user?.username || 'Campeón';
     this.childId = user?.childId || '';
 
@@ -81,444 +81,289 @@ export class JugarComponent implements OnInit {
   }
 
   loadLevels() {
-
     if (!this.childId) {
-
       this.setDefaultLevels();
       this.loading = false;
-
       return;
     }
 
     this.http.get<any>(
       `${environment.apiUrl}/children/${this.childId}/challenges`,
-      {
-        headers: this.getHeaders()
-      }
+      { headers: this.getHeaders() }
     ).subscribe({
-
       next: (res) => {
-
         const apiChallenges = res.data || [];
 
         if (apiChallenges.length === 0) {
-
           this.setDefaultLevels();
-
         } else {
-
-          this.levels = apiChallenges.map(
-            (item: any, index: number) => ({
-
-              id: item.child_challenge_id,
-
-              title:
-                item.title ||
-                `Nivel ${index + 1}`,
-
-              description:
-                item.description ||
-                'Completa este reto saludable.',
-
-              status: this.getLevelStatus(
-                item.status,
-                index
-              ),
-
-              points:
-                item.points_reward || 10,
-
-              icon:
-                this.getLevelIcon(index)
-
-            })
-          );
+          // Lógica para mapear niveles desde BD si los tienes guardados individualmente
+          this.levels = apiChallenges.map((item: any, index: number) => ({
+            id: item.child_challenge_id,
+            levelNumber: index + 1,
+            title: item.title || `Nivel ${index + 1}`,
+            description: item.description || 'Completa este reto saludable.',
+            status: this.getLevelStatus(item.status, index),
+            points: item.points_reward || this.calculatePoints(index + 1),
+            icon: this.getLevelIcon(index)
+          }));
         }
-
         this.loading = false;
       },
-
       error: () => {
-
         this.setDefaultLevels();
-
         this.loading = false;
       }
     });
   }
 
-  getLevelStatus(
-    status: string,
-    index: number
-  ): 'completed' | 'unlocked' | 'locked' {
-
-    if (status === 'completed') {
-      return 'completed';
-    }
-
-    if (
-      status === 'in_progress' ||
-      index === 0
-    ) {
-      return 'unlocked';
-    }
-
+  getLevelStatus(status: string, index: number): 'completed' | 'unlocked' | 'locked' {
+    if (status === 'completed') return 'completed';
+    if (status === 'in_progress' || index === 0) return 'unlocked';
     return 'locked';
   }
 
   getLevelIcon(index: number): string {
-
-    const icons = [
-      '🥦',
-      '🏃',
-      '💧',
-      '🍎',
-      '🚴',
-      '⭐',
-      '🏆'
-    ];
-
+    const icons = ['🥦', '🏃', '💧', '🍎', '🚴', '⭐', '🥑', '🤸', '🥕', '🏆'];
     return icons[index % icons.length];
   }
 
+  calculatePoints(levelNumber: number): number {
+    // Escalado de XP dinámico: Nivel 1 = 50xp, Nivel 50 = ~200xp
+    if (levelNumber <= 10) return 50;
+    if (levelNumber <= 20) return 75;
+    if (levelNumber <= 30) return 100;
+    if (levelNumber <= 40) return 150;
+    return 200;
+  }
+
   setDefaultLevels() {
+    // 1. Recuperamos el nivel máximo alcanzado desde localStorage (por defecto será el 1)
+    const maxUnlockedLevel = parseInt(localStorage.getItem(`child_max_level_${this.childId}`) || '1', 10);
 
-    this.levels = [
+    // 2. Motor de generación para 50 niveles con persistencia local
+    this.levels = Array.from({ length: 50 }, (_, i) => {
+      const levelNum = i + 1;
+      let currentStatus: 'completed' | 'unlocked' | 'locked' = 'locked';
 
-      {
-        id: 'nivel-1',
-        title: 'Nivel 1',
-        description:
-          'Elige el alimento más saludable.',
-        status: 'unlocked',
-        points: 10,
-        icon: '🥦'
-      },
-
-      {
-        id: 'nivel-2',
-        title: 'Nivel 2',
-        description:
-          'Reto de movimiento saludable.',
-        status: 'locked',
-        points: 15,
-        icon: '🏃'
-      },
-
-      {
-        id: 'nivel-3',
-        title: 'Nivel 3',
-        description:
-          'Aprende a hidratarte.',
-        status: 'locked',
-        points: 20,
-        icon: '💧'
-      },
-
-      {
-        id: 'nivel-4',
-        title: 'Nivel 4',
-        description:
-          'Hábitos de alimentación saludable.',
-        status: 'locked',
-        points: 25,
-        icon: '🍎'
-      },
-
-      {
-        id: 'nivel-5',
-        title: 'Nivel 5',
-        description:
-          'Actividad física divertida.',
-        status: 'locked',
-        points: 30,
-        icon: '🚴'
+      // Lógica de estados basada en el progreso guardado
+      if (levelNum < maxUnlockedLevel) {
+        currentStatus = 'completed';
+      } else if (levelNum === maxUnlockedLevel) {
+        currentStatus = 'unlocked';
       }
-    ];
+
+      return {
+        id: `nivel-${levelNum}`,
+        levelNumber: levelNum,
+        title: `Nivel ${levelNum}`,
+        description: this.getDynamicDescription(levelNum),
+        status: currentStatus,
+        points: this.calculatePoints(levelNum),
+        icon: this.getLevelIcon(i)
+      };
+    });
+  }
+
+  getDynamicDescription(level: number): string {
+    if (level <= 10) return 'Conceptos básicos: alimentos y agua.';
+    if (level <= 20) return 'Descubre los grupos alimenticios y la energía.';
+    if (level <= 30) return 'Aprende sobre nutrientes y calorías.';
+    if (level <= 40) return 'Toma decisiones saludables y mejora tus hábitos.';
+    return 'Desafíos expertos. ¡Demuestra todo lo que sabes!';
   }
 
   get currentQuestion(): QuizQuestion | null {
-
-    if (!this.quiz.length) {
-      return null;
-    }
-
+    if (!this.quiz.length) return null;
     return this.quiz[this.currentQuestionIndex];
   }
 
   generateQuiz() {
-
-    if (!this.childId) {
-      return;
-    }
+    if (!this.childId || !this.selectedLevel) return;
 
     this.loadingQuiz = true;
 
+    // Se envía el nivel actual al backend para ajustar la dificultad del prompt
     this.http.post<any>(
       `${environment.apiUrl}/ml/children/${this.childId}/generate-quiz`,
-      {
-        topic: this.selectedTopic
+      { 
+        topic: this.selectedTopic,
+        level: this.selectedLevel.levelNumber 
       },
-      {
-        headers: this.getHeaders()
-      }
-    )
-    .subscribe({
-
+      { headers: this.getHeaders() }
+    ).subscribe({
       next: (res) => {
-
-        const quizData =
-          res.data?.quiz ||
-          res.data;
-
-        this.quiz =
-          quizData.questions || [];
-
+        const quizData = res.data?.quiz || res.data;
+        this.quiz = quizData.questions || [];
         this.currentQuestionIndex = 0;
         this.score = 0;
         this.quizFinished = false;
-
+        this.passedLevel = false;
         this.loadingQuiz = false;
       },
-
       error: (err) => {
-
         console.error(err);
-
         this.loadingQuiz = false;
-
-        this.feedbackMessage =
-          'Error generando el quiz.';
+        this.feedbackMessage = 'Error conectando con la aventura. Intenta de nuevo.';
       }
     });
   }
 
   openLevel(level: Level) {
-
     if (level.status === 'locked') {
-
-      this.feedbackMessage =
-        '🔒 Primero completa el nivel anterior.';
-
+      this.feedbackMessage = '🔒 Primero completa el nivel anterior para desbloquear este.';
+      setTimeout(() => this.feedbackMessage = '', 3000);
       return;
     }
-
     this.selectedLevel = level;
-
     this.selectedAnswer = '';
-
+    this.isAnswerRevealed = false;
     this.feedbackMessage = '';
-
     this.generateQuiz();
   }
 
   selectAnswer(option: string) {
-
-    if (!this.currentQuestion) {
-      return;
-    }
+    if (!this.currentQuestion || this.isAnswerRevealed) return;
 
     this.selectedAnswer = option;
+    this.isAnswerRevealed = true; // Bloquea interacciones
 
-    if (
-      option ===
-      this.currentQuestion.answer
-    ) {
+    if (option === this.currentQuestion.answer) {
       this.score++;
     }
 
-    if (
-      this.currentQuestionIndex <
-      this.quiz.length - 1
-    ) {
-
-      this.currentQuestionIndex++;
-
-    } else {
-
-      this.finishQuiz();
-    }
+    // UX: Pausa visual de 1.5 segundos para mostrar si fue correcta o incorrecta
+    setTimeout(() => {
+      this.isAnswerRevealed = false;
+      this.selectedAnswer = '';
+      
+      if (this.currentQuestionIndex < this.quiz.length - 1) {
+        this.currentQuestionIndex++;
+      } else {
+        this.finishQuiz();
+      }
+    }, 1500);
   }
 
-  finishQuiz() {
-
+ finishQuiz() {
     this.quizFinished = true;
+    
+    // Regla de Negocio: Se requiere el 80% (4 de 5 correctas)
+    const percentage = (this.score / this.quiz.length) * 100;
+    this.passedLevel = percentage >= 80;
 
-    const percentage =
-      (this.score / this.quiz.length) * 100;
+    let xpEarned = 0;
 
-    const xpEarned =
-      Math.round(percentage);
+    if (this.passedLevel) {
+      xpEarned = this.selectedLevel?.points || 50;
+      if (percentage === 100) xpEarned += Math.round(xpEarned * 0.2); // 20% bonus perfecto
+      this.feedbackMessage = `🎉 ¡Nivel Superado! Ganaste ${xpEarned} XP`;
+    } else {
+      xpEarned = 10; // XP de consolación
+      this.feedbackMessage = `💪 Estuviste cerca. Necesitas al menos 4 correctas. Obtuviste ${this.score}/5.`;
+    }
 
-    this.feedbackMessage =
-      `🎉 Obtuviste ${this.score} de ${this.quiz.length}`;
-
+    // Persistir resultado en base de datos
     this.http.post(
       `${environment.apiUrl}/ml/children/${this.childId}/quiz-result`,
       {
-        topic: this.selectedTopic,
+        topic: this.selectedTopic, // <--- FALTABA ESTA LÍNEA
+        level: this.selectedLevel?.levelNumber,
         score: this.score,
         totalQuestions: this.quiz.length,
         percentage,
-        xpEarned
+        xpEarned,
+        passed: this.passedLevel
       },
-      {
-        headers: this.getHeaders()
-      }
+      { headers: this.getHeaders() }
     ).subscribe();
 
-    this.completeSelectedLevel();
+    if (this.passedLevel) {
+      this.completeSelectedLevel();
+    }
   }
 
   completeSelectedLevel() {
+    if (!this.selectedLevel) return;
 
-    if (!this.selectedLevel) {
-      return;
-    }
-
-    const index =
-      this.levels.findIndex(
-        level =>
-          level.id ===
-          this.selectedLevel?.id
-      );
+    const index = this.levels.findIndex(l => l.id === this.selectedLevel?.id);
+    let maxLevelToSave = this.selectedLevel.levelNumber;
 
     if (index !== -1) {
-
-      this.levels[index].status =
-        'completed';
-
-      if (
-        this.levels[index + 1]
-      ) {
-
-        this.levels[index + 1].status =
-          'unlocked';
+      this.levels[index].status = 'completed';
+      
+      // Desbloquear el siguiente nivel de forma local
+      if (this.levels[index + 1]) {
+        this.levels[index + 1].status = 'unlocked';
+        maxLevelToSave = this.levels[index + 1].levelNumber;
       }
     }
 
-    if (
-      this.childId &&
-      !this.selectedLevel.id.startsWith(
-        'nivel-'
-      )
-    ) {
+    // Guardamos el progreso en el navegador amarrado al ID del niño
+    localStorage.setItem(`child_max_level_${this.childId}`, maxLevelToSave.toString());
 
-      this.http.patch<any>(
-        `${environment.apiUrl}/children/${this.childId}/challenges/${this.selectedLevel.id}`,
-        {
-          status: 'completed'
-        },
-        {
-          headers: this.getHeaders()
-        }
-      ).subscribe();
+    // Validación de Trofeos a niveles específicos
+    this.checkAndUnlockTrophies(this.selectedLevel.levelNumber);
+  }
+
+  checkAndUnlockTrophies(completedLevel: number) {
+    let trophyConfig = null;
+
+    if (completedLevel === 10) {
+      trophyConfig = { id: 'trofeo-10', title: 'Explorador Saludable', description: '¡Superaste los primeros 10 niveles!', icon: '🌟' };
+    } else if (completedLevel === 25) {
+      trophyConfig = { id: 'trofeo-25', title: 'Héroe de la Nutrición', description: '¡Llegaste a la mitad del camino!', icon: '🦸' };
+    } else if (completedLevel === 50) {
+      trophyConfig = { id: 'trofeo-50', title: 'Maestro de Hábitos', description: '¡Has completado toda la aventura!', icon: '👑' };
     }
 
-    const completedLevels =
-      this.levels.filter(
-        level =>
-          level.status === 'completed'
-      ).length;
-
-    if (completedLevels === 5) {
-      this.unlockStageTrophy();
+    if (trophyConfig) {
+      this.unlockTrophy(trophyConfig);
     }
   }
 
-  unlockStageTrophy() {
-
-    const trophy = {
-
-      id: 'etapa-1',
-
-      title:
-        'Explorador Saludable',
-
-      description:
-        'Completaste los primeros 5 niveles.',
-
-      icon: '🏆',
-
-      unlockedAt:
-        new Date().toISOString()
-    };
-
-    const savedTrophies =
-      JSON.parse(
-        localStorage.getItem(
-          'child_trophies'
-        ) || '[]'
-      );
-
-    const alreadyExists =
-      savedTrophies.some(
-        (item: any) =>
-          item.id === trophy.id
-      );
+  unlockTrophy(trophy: any) {
+    const savedTrophies = JSON.parse(localStorage.getItem(`child_trophies_${this.childId}`) || '[]');
+    const alreadyExists = savedTrophies.some((item: any) => item.id === trophy.id);
 
     if (!alreadyExists) {
+      savedTrophies.push({ ...trophy, unlockedAt: new Date().toISOString() });
+      localStorage.setItem(`child_trophies_${this.childId}`, JSON.stringify(savedTrophies));
 
-      savedTrophies.push(trophy);
-
-      localStorage.setItem(
-        'child_trophies',
-        JSON.stringify(savedTrophies)
-      );
-
-      this.newTrophy = {
-
-        title: trophy.title,
-
-        description:
-          trophy.description,
-
-        icon: trophy.icon
-      };
-
+      this.newTrophy = { title: trophy.title, description: trophy.description, icon: trophy.icon };
       this.showTrophyModal = true;
     }
   }
 
   closeChallenge() {
-
     this.selectedLevel = null;
-
     this.feedbackMessage = '';
-
     this.selectedAnswer = '';
-
+    this.isAnswerRevealed = false;
     this.quiz = [];
-
     this.currentQuestionIndex = 0;
-
     this.quizFinished = false;
+    this.passedLevel = false;
   }
 
   closeTrophyModal() {
     this.showTrophyModal = false;
   }
 
+  // Espaciado vertical fijo en píxeles (no en porcentajes)
   getNodeTop(index: number): number {
-
-    const positions = [
-      78, 62, 48, 34, 20, 35, 55
-    ];
-
-    return positions[
-      index % positions.length
-    ];
+    const startOffset = 80; // Margen desde arriba del mapa
+    const spacing = 140; // Separación vertical entre cada nivel
+    return startOffset + (index * spacing);
   }
 
+  // Zig-Zag en porcentajes (horizontal)
   getNodeLeft(index: number): number {
-
-    const positions = [
-      12, 28, 45, 62, 80, 90, 70
-    ];
-
-    return positions[
-      index % positions.length
-    ];
+    const row = Math.floor(index / 3); 
+    const isEvenRow = row % 2 === 0;
+    const posInRow = index % 3;
+    
+    return isEvenRow ? 20 + (posInRow * 30) : 80 - (posInRow * 30);
   }
 
   logout() {

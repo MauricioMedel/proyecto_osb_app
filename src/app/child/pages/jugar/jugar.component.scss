@@ -60,20 +60,56 @@
   color: #dc2626;
 }
 
+/* =========================================
+   NUEVA ESTRUCTURA DEL MAPA CON SCROLL
+========================================= */
+
 .map-card {
-  background: white;
+  width: 100%;
   border-radius: 34px;
-  padding: 18px;
+  background: linear-gradient(to bottom, #d4f0ff, #e8f9ed);
+  border: 4px solid #fff;
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+  overflow: hidden; /* Oculta lo que salga de los bordes redondeados */
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Título fijo para que no se pierda al hacer scroll */
+.map-title-fixed {
+  text-align: center;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 2px solid #e2e8f0;
+  z-index: 10;
+  
+  h2 {
+    margin: 0;
+    color: #1e3a8a;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #64748b;
+  }
+}
+
+/* El contenedor que permite deslizar los 50 niveles */
+.scroll-container {
+  height: 65vh; /* Puedes ajustar esto dependiendo de cuánto quieres que ocupe en pantalla */
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* El lienzo que se estira dinámicamente con [style.height.px] */
 .map-background {
   position: relative;
-  min-height: 620px;
-  border-radius: 28px;
-  overflow: hidden;
+  width: 100%;
+  /* Eliminamos el min-height fijo para que Angular inyecte la altura real */
   background:
-    radial-gradient(circle at 20% 20%, #ffffff 0 8%, transparent 9%),
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0 8%, transparent 9%),
     linear-gradient(180deg, #dbeafe 0%, #bbf7d0 100%);
 }
 
@@ -96,30 +132,8 @@
 }
 
 .cloud-two {
-  bottom: 130px;
+  top: 230px; /* Cambiado de bottom a top para que se quede arriba en el lienzo */
   right: 110px;
-}
-
-.map-title {
-  position: absolute;
-  top: 26px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  border-radius: 22px;
-  padding: 16px 24px;
-  text-align: center;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
-
-  h2 {
-    margin: 0;
-    color: #1e3a8a;
-  }
-
-  p {
-    margin: 6px 0 0;
-    color: #64748b;
-  }
 }
 
 .path-line {
@@ -138,13 +152,21 @@
     #ffffff 34px
   );
   opacity: 0.8;
+  display: none; /* Te sugiero ocultar la línea por ahora, ya que el camino en zig-zag de 50 niveles requeriría dibujar líneas entre cada punto mediante SVG */
 }
 
+/* Nodos */
 .level-node {
   position: absolute;
   transform: translate(-50%, -50%);
   text-align: center;
   cursor: pointer;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.level-node:hover {
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 .node-circle {
@@ -188,6 +210,8 @@
   padding: 8px 12px;
   min-width: 90px;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+  position: relative;
+  z-index: 3;
 
   strong {
     display: block;
@@ -202,7 +226,7 @@
 }
 
 .feedback {
-  position: absolute;
+  position: fixed;
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
@@ -211,7 +235,13 @@
   padding: 14px 20px;
   border-radius: 18px;
   font-weight: bold;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
+/* =========================================
+   MODALES (QUIZ Y TROFEOS)
+========================================= */
 
 .challenge-modal {
   position: fixed;
@@ -220,6 +250,7 @@
   display: grid;
   place-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .challenge-card {
@@ -255,6 +286,12 @@
   border-radius: 50%;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
+  
+  &:hover {
+    background: #f87171;
+    color: white;
+  }
 }
 
 .level-badge {
@@ -282,7 +319,7 @@
 
 .answers-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* Cambio a 2 columnas para 4 opciones */
   gap: 14px;
 }
 
@@ -294,17 +331,24 @@
   font-weight: bold;
   color: #334155;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   span {
     display: block;
     font-size: 42px;
     margin-bottom: 8px;
   }
+
+  &:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+  }
 }
 
 .answer-card.selected {
   border-color: #22c55e;
   background: #f0fdf4;
+  transform: scale(0.98);
 }
 
 .modal-feedback {
@@ -325,37 +369,13 @@
   border-radius: 18px;
   font-weight: bold;
   cursor: pointer;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.08);
-  }
-
-  100% {
-    transform: scale(1);
+  transition: 0.2s;
+  
+  &:hover {
+    background: #1d4ed8;
   }
 }
 
-@media (max-width: 900px) {
-  .game-header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .answers-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .map-background {
-    min-height: 720px;
-  }
-}
 .trophy-overlay {
   position: fixed;
   inset: 0;
@@ -376,6 +396,22 @@
   text-align: center;
   box-shadow: 0 24px 55px rgba(0, 0, 0, 0.22);
   animation: trophyPop 0.4s ease;
+  
+  h2 {
+    color: #2563eb;
+    margin: 10px 0 0;
+  }
+
+  h3 {
+    color: #1e3a8a;
+    font-size: 28px;
+    margin: 12px 0;
+  }
+
+  p {
+    color: #64748b;
+    margin-bottom: 25px;
+  }
 }
 
 .sparkles {
@@ -388,22 +424,6 @@
   animation: bounce 1s infinite;
 }
 
-.trophy-modal h2 {
-  color: #2563eb;
-  margin: 10px 0 0;
-}
-
-.trophy-modal h3 {
-  color: #1e3a8a;
-  font-size: 28px;
-  margin: 12px 0;
-}
-
-.trophy-modal p {
-  color: #64748b;
-  margin-bottom: 25px;
-}
-
 .trophy-btn {
   border: none;
   background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -413,6 +433,21 @@
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* =========================================
+   ANIMACIONES Y RESPONSIVE
+========================================= */
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 @keyframes trophyPop {
@@ -420,7 +455,6 @@
     transform: scale(0.7);
     opacity: 0;
   }
-
   to {
     transform: scale(1);
     opacity: 1;
@@ -428,11 +462,22 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@media (max-width: 900px) {
+  .game-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
   }
 
-  50% {
-    transform: translateY(-12px);
+  .answers-grid {
+    grid-template-columns: 1fr; /* En pantallas muy pequeñas, se apilan a 1 columna */
+  }
+  
+  .scroll-container {
+    height: 70vh; /* Un poco más alto en móvil */
   }
 }

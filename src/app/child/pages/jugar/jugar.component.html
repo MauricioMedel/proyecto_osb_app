@@ -23,45 +23,52 @@
 
   <section class="map-card" *ngIf="!loading">
 
-    <div class="map-background">
-      <div class="cloud cloud-one">☁️</div>
-      <div class="cloud cloud-two">☁️</div>
-      <div class="sun">☀️</div>
-
-      <div class="map-title">
-        <h2>Mapa de niveles</h2>
-        <p>Completa cada nivel para desbloquear el siguiente.</p>
-      </div>
-
-      <div class="path-line"></div>
-
-      <div
-        class="level-node"
-        *ngFor="let level of levels; let i = index"
-        [class.completed]="level.status === 'completed'"
-        [class.unlocked]="level.status === 'unlocked'"
-        [class.locked]="level.status === 'locked'"
-        [style.top.%]="getNodeTop(i)"
-        [style.left.%]="getNodeLeft(i)"
-        (click)="openLevel(level)"
-      >
-        <div class="node-circle">
-          <span *ngIf="level.status === 'completed'">✅</span>
-          <span *ngIf="level.status === 'unlocked'">{{ level.icon }}</span>
-          <span *ngIf="level.status === 'locked'">🔒</span>
-        </div>
-
-        <div class="node-label">
-          <strong>{{ level.title }}</strong>
-          <small>{{ level.points }} pts</small>
-        </div>
-      </div>
-
-      <div class="feedback" *ngIf="feedbackMessage && !selectedLevel">
-        {{ feedbackMessage }}
-      </div>
+    <!-- Título fijo arriba (opcional, para que no se mueva al hacer scroll) -->
+    <div class="map-title-fixed">
+      <h2>Mapa de niveles</h2>
+      <p>Completa cada nivel para desbloquear el siguiente.</p>
     </div>
 
+    <!-- Contenedor que hará el scroll -->
+    <div class="scroll-container">
+      
+      <!-- Fondo dinámico: Multiplicamos cada nivel por 140px de separación + 200px de margen inferior -->
+      <div class="map-background" [style.height.px]="(levels.length * 140) + 200">
+        
+        <div class="cloud cloud-one">☁️</div>
+        <div class="cloud cloud-two">☁️</div>
+        <div class="sun">☀️</div>
+
+        <div class="path-line"></div>
+
+        <div
+          class="level-node"
+          *ngFor="let level of levels; let i = index"
+          [class.completed]="level.status === 'completed'"
+          [class.unlocked]="level.status === 'unlocked'"
+          [class.locked]="level.status === 'locked'"
+          [style.top.px]="getNodeTop(i)"
+          [style.left.%]="getNodeLeft(i)"
+          (click)="openLevel(level)"
+        >
+          <div class="node-circle">
+            <span *ngIf="level.status === 'completed'">✅</span>
+            <span *ngIf="level.status === 'unlocked'">{{ level.icon }}</span>
+            <span *ngIf="level.status === 'locked'">🔒</span>
+          </div>
+
+          <div class="node-label">
+            <strong>{{ level.title }}</strong>
+            <small>{{ level.points }} pts</small>
+          </div>
+        </div>
+
+        <div class="feedback" *ngIf="feedbackMessage && !selectedLevel">
+          {{ feedbackMessage }}
+        </div>
+
+      </div>
+    </div>
   </section>
 
   <div class="challenge-modal" *ngIf="selectedLevel">
