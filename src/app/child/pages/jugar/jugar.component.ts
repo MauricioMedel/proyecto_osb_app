@@ -41,13 +41,18 @@ export class JugarComponent implements OnInit {
 
   selectedLevel: Level | null = null;
   selectedAnswer = '';
-  isAnswerRevealed = false; // Bloquea clics múltiples mientras muestra si es correcto/incorrecto
+  isAnswerRevealed = false; 
+  isCorrectChoice: boolean | null = null; // Nuevo: Para pintar el botón rojo o verde
 
   quiz: QuizQuestion[] = [];
   currentQuestionIndex = 0;
   score = 0;
   quizFinished = false;
   passedLevel = false;
+
+  // Nuevas variables para el sistema de vidas
+  lives = 3;
+  gameOver = false;
 
   selectedTopic = 'nutrition';
 
@@ -97,7 +102,6 @@ export class JugarComponent implements OnInit {
         if (apiChallenges.length === 0) {
           this.setDefaultLevels();
         } else {
-          // Lógica para mapear niveles desde BD si los tienes guardados individualmente
           this.levels = apiChallenges.map((item: any, index: number) => ({
             id: item.child_challenge_id,
             levelNumber: index + 1,
@@ -129,7 +133,6 @@ export class JugarComponent implements OnInit {
   }
 
   calculatePoints(levelNumber: number): number {
-    // Escalado de XP dinámico: Nivel 1 = 50xp, Nivel 50 = ~200xp
     if (levelNumber <= 10) return 50;
     if (levelNumber <= 20) return 75;
     if (levelNumber <= 30) return 100;
@@ -138,15 +141,12 @@ export class JugarComponent implements OnInit {
   }
 
   setDefaultLevels() {
-    // 1. Recuperamos el nivel máximo alcanzado desde localStorage (por defecto será el 1)
     const maxUnlockedLevel = parseInt(localStorage.getItem(`child_max_level_${this.childId}`) || '1', 10);
 
-    // 2. Motor de generación para 50 niveles con persistencia local
     this.levels = Array.from({ length: 50 }, (_, i) => {
       const levelNum = i + 1;
       let currentStatus: 'completed' | 'unlocked' | 'locked' = 'locked';
 
-      // Lógica de estados basada en el progreso guardado
       if (levelNum < maxUnlockedLevel) {
         currentStatus = 'completed';
       } else if (levelNum === maxUnlockedLevel) {
@@ -183,7 +183,6 @@ export class JugarComponent implements OnInit {
 
     this.loadingQuiz = true;
 
-    // Se envía el nivel actual al backend para ajustar la dificultad del prompt
     this.http.post<any>(
       `${environment.apiUrl}/ml/children/${this.childId}/generate-quiz`,
       { 
@@ -216,71 +215,85 @@ export class JugarComponent implements OnInit {
       return;
     }
     this.selectedLevel = level;
+    
+    // Reiniciar estados del quiz y vidas
+    this.lives = 3;
+    this.gameOver = false;
     this.selectedAnswer = '';
     this.isAnswerRevealed = false;
+    this.isCorrectChoice = null;
     this.feedbackMessage = '';
+    
     this.generateQuiz();
   }
 
   selectAnswer(option: string) {
-    if (!this.currentQuestion || this.isAnswerRevealed) return;
+    if (!this.currentQuestion || this.isAnswerRevealed || this.gameOver) return;
 
     this.selectedAnswer = option;
-    this.isAnswerRevealed = true; // Bloquea interacciones
+    this.isAnswerRevealed = true;
+    
+    this.isCorrectChoice = (option === this.currentQuestion.answer);
 
-    if (option === this.currentQuestion.answer) {
+    if (!this.isCorrectChoice) {
+      this.lives--; 
+      
+      if (this.lives <= 0) {
+        setTimeout(() => {
+          this.gameOver = true;
+          this.isAnswerRevealed = false;
+        }, 1500);
+        return;
+      }
+    } else {
       this.score++;
     }
 
-    // UX: Pausa visual de 1.5 segundos para mostrar si fue correcta o incorrecta
+    // UX: Pausa visual de 1.5 segundos
     setTimeout(() => {
       this.isAnswerRevealed = false;
       this.selectedAnswer = '';
       
-      if (this.currentQuestionIndex < this.quiz.length - 1) {
-        this.currentQuestionIndex++;
+      if (this.isCorrectChoice) {
+        this.isCorrectChoice = null;
+        if (this.currentQuestionIndex < this.quiz.length - 1) {
+          this.currentQuestionIndex++;
+        } else {
+          this.finishQuiz(); 
+        }
       } else {
-        this.finishQuiz();
+        this.isCorrectChoice = null;
+        this.feedbackMessage = '¡Ups! Inténtalo de nuevo. Tú puedes.';
+        setTimeout(() => this.feedbackMessage = '', 2000);
       }
     }, 1500);
   }
 
- finishQuiz() {
+  finishQuiz() {
     this.quizFinished = true;
-    
-    // Regla de Negocio: Se requiere el 80% (4 de 5 correctas)
-    const percentage = (this.score / this.quiz.length) * 100;
-    this.passedLevel = percentage >= 80;
+    this.passedLevel = true; // Si llegó aquí es porque no perdió sus 3 vidas
 
-    let xpEarned = 0;
+    let xpEarned = this.selectedLevel?.points || 50;
+    if (this.lives === 3) xpEarned += Math.round(xpEarned * 0.2); // 20% bonus por perfección
 
-    if (this.passedLevel) {
-      xpEarned = this.selectedLevel?.points || 50;
-      if (percentage === 100) xpEarned += Math.round(xpEarned * 0.2); // 20% bonus perfecto
-      this.feedbackMessage = `🎉 ¡Nivel Superado! Ganaste ${xpEarned} XP`;
-    } else {
-      xpEarned = 10; // XP de consolación
-      this.feedbackMessage = `💪 Estuviste cerca. Necesitas al menos 4 correctas. Obtuviste ${this.score}/5.`;
-    }
+    this.feedbackMessage = `🎉 ¡Nivel Superado! Ganaste ${xpEarned} XP (Vidas: ${this.lives})`;
 
-    // Persistir resultado en base de datos
     this.http.post(
       `${environment.apiUrl}/ml/children/${this.childId}/quiz-result`,
       {
-        topic: this.selectedTopic, // <--- FALTABA ESTA LÍNEA
+        topic: this.selectedTopic, 
         level: this.selectedLevel?.levelNumber,
         score: this.score,
         totalQuestions: this.quiz.length,
-        percentage,
+        percentage: 100, // Forzado a 100 porque debe responder todo bien para pasar
         xpEarned,
-        passed: this.passedLevel
+        passed: this.passedLevel,
+        livesRemaining: this.lives // Añadimos las vidas restantes por si el backend las necesita
       },
       { headers: this.getHeaders() }
     ).subscribe();
 
-    if (this.passedLevel) {
-      this.completeSelectedLevel();
-    }
+    this.completeSelectedLevel();
   }
 
   completeSelectedLevel() {
@@ -292,17 +305,14 @@ export class JugarComponent implements OnInit {
     if (index !== -1) {
       this.levels[index].status = 'completed';
       
-      // Desbloquear el siguiente nivel de forma local
       if (this.levels[index + 1]) {
         this.levels[index + 1].status = 'unlocked';
         maxLevelToSave = this.levels[index + 1].levelNumber;
       }
     }
 
-    // Guardamos el progreso en el navegador amarrado al ID del niño
     localStorage.setItem(`child_max_level_${this.childId}`, maxLevelToSave.toString());
 
-    // Validación de Trofeos a niveles específicos
     this.checkAndUnlockTrophies(this.selectedLevel.levelNumber);
   }
 
@@ -340,30 +350,35 @@ export class JugarComponent implements OnInit {
     this.feedbackMessage = '';
     this.selectedAnswer = '';
     this.isAnswerRevealed = false;
+    this.isCorrectChoice = null;
     this.quiz = [];
     this.currentQuestionIndex = 0;
     this.quizFinished = false;
     this.passedLevel = false;
+    this.gameOver = false;
   }
 
   closeTrophyModal() {
     this.showTrophyModal = false;
   }
 
-  // Espaciado vertical fijo en píxeles (no en porcentajes)
+  // Espaciado vertical fijo aumentado a 180px para dar mucho más espacio
   getNodeTop(index: number): number {
-    const startOffset = 80; // Margen desde arriba del mapa
-    const spacing = 140; // Separación vertical entre cada nivel
+    const startOffset = 80; 
+    const spacing = 180; 
     return startOffset + (index * spacing);
   }
 
-  // Zig-Zag en porcentajes (horizontal)
+  // Nuevo algoritmo de Zig-Zag (Evita que dos niveles caigan en la misma columna)
   getNodeLeft(index: number): number {
-    const row = Math.floor(index / 3); 
-    const isEvenRow = row % 2 === 0;
-    const posInRow = index % 3;
-    
-    return isEvenRow ? 20 + (posInRow * 30) : 80 - (posInRow * 30);
+    // Patrón: Izquierda, Centro, Derecha, Centro, repite...
+    const positions = [20, 50, 80, 50]; 
+    return positions[index % 4];
+  }
+
+  // Calcula el alto total del fondo para que quepan todos los niveles y la línea final
+  getMapHeight(): number {
+    return this.getNodeTop(this.levels.length) + 150;
   }
 
   logout() {

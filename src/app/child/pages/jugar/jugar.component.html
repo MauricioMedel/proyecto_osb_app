@@ -23,7 +23,7 @@
 
   <section class="map-card" *ngIf="!loading">
 
-    <!-- Título fijo arriba (opcional, para que no se mueva al hacer scroll) -->
+    <!-- Título fijo arriba -->
     <div class="map-title-fixed">
       <h2>Mapa de niveles</h2>
       <p>Completa cada nivel para desbloquear el siguiente.</p>
@@ -32,14 +32,28 @@
     <!-- Contenedor que hará el scroll -->
     <div class="scroll-container">
       
-      <!-- Fondo dinámico: Multiplicamos cada nivel por 140px de separación + 200px de margen inferior -->
-      <div class="map-background" [style.height.px]="(levels.length * 140) + 200">
+      <!-- Usamos la nueva función getMapHeight() -->
+      <div class="map-background" [style.height.px]="getMapHeight()">
         
         <div class="cloud cloud-one">☁️</div>
         <div class="cloud cloud-two">☁️</div>
         <div class="sun">☀️</div>
 
-        <div class="path-line"></div>
+        <!-- MAGIA: SVG que dibuja las líneas punteadas entre los niveles automáticamente -->
+        <svg class="map-path-svg">
+          <ng-container *ngFor="let level of levels; let i = index">
+            <!-- Dibuja una línea desde el nodo actual al siguiente -->
+            <line *ngIf="i < levels.length - 1"
+                  [attr.x1]="getNodeLeft(i) + '%'"
+                  [attr.y1]="getNodeTop(i)"
+                  [attr.x2]="getNodeLeft(i + 1) + '%'"
+                  [attr.y2]="getNodeTop(i + 1)"
+                  stroke-width="8"
+                  stroke-dasharray="12, 12"
+                  stroke-linecap="round"
+                  [attr.stroke]="level.status === 'completed' ? '#3b82f6' : '#cbd5e1'" />
+          </ng-container>
+        </svg>
 
         <div
           class="level-node"
@@ -73,111 +87,132 @@
 
   <div class="challenge-modal" *ngIf="selectedLevel">
 
-  <div class="challenge-card">
+    <div class="challenge-card">
 
-    <button
-      class="close-btn"
-      (click)="closeChallenge()"
-    >
-      ✕
-    </button>
+      <button
+        class="close-btn"
+        (click)="closeChallenge()"
+      >
+        ✕
+      </button>
 
-    <div class="level-badge">
-      {{ selectedLevel.icon }}
-    </div>
-
-    <h2>
-      {{ selectedLevel.title }}
-    </h2>
-
-    <p>
-      {{ selectedLevel.description }}
-    </p>
-
-    <div
-      *ngIf="loadingQuiz"
-      class="question-box"
-    >
-      <h3>
-        🤖 Generando preguntas...
-      </h3>
-    </div>
-
-    <div
-      *ngIf="!loadingQuiz && currentQuestion && !quizFinished"
-      class="question-box"
-    >
-
-      <h3>
-        Pregunta
-        {{ currentQuestionIndex + 1 }}
-        de
-        {{ quiz.length }}
-      </h3>
+      <div class="level-badge">
+        {{ selectedLevel.icon }}
+      </div>
 
       <h2>
-        {{ currentQuestion.question }}
+        {{ selectedLevel.title }}
       </h2>
 
-      <div class="answers-grid">
+      <p>
+        {{ selectedLevel.description }}
+      </p>
+
+      <div
+        *ngIf="loadingQuiz"
+        class="question-box"
+      >
+        <h3>
+          🤖 Generando preguntas...
+        </h3>
+      </div>
+
+      <!-- PANTALLA DEL QUIZ -->
+      <div
+        *ngIf="!loadingQuiz && currentQuestion && !quizFinished && !gameOver"
+        class="question-box"
+      >
+        <!-- Indicador de Vidas -->
+        <div class="lives-container">
+          <span *ngFor="let i of [1, 2, 3]" class="heart" [class.lost]="i > lives">❤️</span>
+        </div>
+
+        <h3>
+          Pregunta {{ currentQuestionIndex + 1 }} de {{ quiz.length }}
+        </h3>
+
+        <h2>
+          {{ currentQuestion.question }}
+        </h2>
+
+        <div class="answers-grid">
+
+          <button
+            class="answer-card"
+            *ngFor="let option of currentQuestion.options"
+            [class.selected-correct]="selectedAnswer === option && isCorrectChoice === true"
+            [class.selected-wrong]="selectedAnswer === option && isCorrectChoice === false"
+            [class.disabled]="isAnswerRevealed"
+            (click)="selectAnswer(option)"
+          >
+            {{ option }}
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- PANTALLA DE GAME OVER -->
+      <div
+        *ngIf="gameOver"
+        class="question-box result-box error-box"
+      >
+        <h2>💔 ¡Oh no! Te quedaste sin vidas</h2>
+        <p>No te preocupes, la constancia hace al maestro. ¡Vuelve a intentarlo!</p>
+        
+        <button
+          class="next-btn retry-btn"
+          (click)="closeChallenge()"
+        >
+          Volver al mapa
+        </button>
+      </div>
+
+      <!-- PANTALLA DE ÉXITO -->
+      <div
+        *ngIf="quizFinished"
+        class="question-box result-box"
+      >
+
+        <h2>
+          🎉 ¡Quiz completado!
+        </h2>
+
+        <h3>
+          Resultado Final
+        </h3>
+
+        <p>
+          Respuestas correctas:
+          {{ score }}
+          de
+          {{ quiz.length }}
+        </p>
+
+        <p>
+          Vidas restantes: {{ lives }} ❤️
+        </p>
 
         <button
-          class="answer-card"
-          *ngFor="let option of currentQuestion.options"
-          [class.selected]="selectedAnswer === option"
-          (click)="selectAnswer(option)"
+          class="next-btn"
+          (click)="closeChallenge()"
         >
-          {{ option }}
+          Volver al mapa
         </button>
 
       </div>
 
-    </div>
-
-    <div
-      *ngIf="quizFinished"
-      class="question-box result-box"
-    >
-
-      <h2>
-        🎉 ¡Quiz completado!
-      </h2>
-
-      <h3>
-        Resultado Final
-      </h3>
-
-      <p>
-        Respuestas correctas:
-        {{ score }}
-        de
-        {{ quiz.length }}
-      </p>
-
-      <p>
-        Porcentaje:
-        {{ (score / quiz.length) * 100 | number:'1.0-0' }}%
-      </p>
-
-      <button
-        class="next-btn"
-        (click)="closeChallenge()"
+      <!-- FEEDBACK DE ESTADO (Errores, aciertos) -->
+      <div
+        class="modal-feedback"
+        *ngIf="feedbackMessage && !quizFinished && !gameOver"
       >
-        Volver al mapa
-      </button>
+        {{ feedbackMessage }}
+      </div>
 
-    </div>
-
-    <div
-      class="modal-feedback"
-      *ngIf="feedbackMessage && !quizFinished"
-    >
-      {{ feedbackMessage }}
     </div>
 
   </div>
-
-</div>
 
   <div class="trophy-overlay" *ngIf="showTrophyModal">
     <div class="trophy-modal">
