@@ -219,32 +219,44 @@
       <p class="modal-description">
         Registra los datos físicos de
         <strong>{{ selectedChild.nickname }}</strong>
-        para estimar su nivel de riesgo mediante Random Forest.
+        para conocer su nivel de bienestar y recibir recomendaciones personalizadas.
       </p>
 
-      <label>Edad</label>
-      <input type="number" [(ngModel)]="healthForm.age" placeholder="Ej. 11" />
+      <div *ngIf="healthErrorMessage" class="modal-alert modal-alert-error" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ healthErrorMessage }}</span>
+      </div>
 
-      <label>Género</label>
-      <select [(ngModel)]="healthForm.gender">
-        <option value="">Selecciona una opción</option>
-        <option value="female">Femenino</option>
-        <option value="male">Masculino</option>
-      </select>
+      <div *ngIf="healthSuccessMessage" class="modal-alert modal-alert-success" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ healthSuccessMessage }}</span>
+      </div>
 
-      <label>Peso en kg</label>
-      <input type="number" [(ngModel)]="healthForm.weight_kg" placeholder="Ej. 55" />
+      <ng-container *ngIf="!healthSuccessMessage">
+        <label>Edad</label>
+        <input type="number" [(ngModel)]="healthForm.age" placeholder="Ej. 11" />
 
-      <label>Estatura en cm</label>
-      <input type="number" [(ngModel)]="healthForm.height_cm" placeholder="Ej. 145" />
+        <label>Género</label>
+        <select [(ngModel)]="healthForm.gender">
+          <option value="">Selecciona una opción</option>
+          <option value="female">Femenino</option>
+          <option value="male">Masculino</option>
+        </select>
+
+        <label>Peso en kg</label>
+        <input type="number" [(ngModel)]="healthForm.weight_kg" placeholder="Ej. 55" />
+
+        <label>Estatura en cm</label>
+        <input type="number" [(ngModel)]="healthForm.height_cm" placeholder="Ej. 145" />
+      </ng-container>
 
       <div class="modal-actions">
         <button class="cancel-btn" (click)="closeHealthForm()">
-          Cancelar
+          {{ healthSuccessMessage ? 'Cerrar' : 'Cancelar' }}
         </button>
 
-        <button class="primary-btn" (click)="submitHealthMetric()" [disabled]="healthLoading">
-          {{ healthLoading ? 'Evaluando...' : 'Evaluar con IA' }}
+        <button *ngIf="!healthSuccessMessage" class="primary-btn" (click)="submitHealthMetric()" [disabled]="healthLoading">
+          {{ healthLoading ? 'Evaluando...' : 'Obtener evaluación' }}
         </button>
       </div>
     </div>
