@@ -31,44 +31,22 @@
 
     <form #registerForm="ngForm" (ngSubmit)="register()">
 
-      <input
-        [(ngModel)]="username"
-        name="username"
-        type="text"
-        placeholder="Nombre de usuario"
-        class="register-input"
-        required
-        #usernameRef="ngModel"
-      />
+      <input [(ngModel)]="username" name="username" type="text" placeholder="Nombre de usuario" class="register-input"
+        required #usernameRef="ngModel" />
 
       <div class="register-error" *ngIf="usernameRef.invalid && usernameRef.touched">
         El nombre de usuario es obligatorio.
       </div>
 
-      <input
-        [(ngModel)]="displayName"
-        name="displayName"
-        type="text"
-        placeholder="Nombre completo del tutor"
-        class="register-input"
-        required
-        #displayNameRef="ngModel"
-      />
+      <input [(ngModel)]="displayName" name="displayName" type="text" placeholder="Nombre completo del tutor"
+        class="register-input" required #displayNameRef="ngModel" />
 
       <div class="register-error" *ngIf="displayNameRef.invalid && displayNameRef.touched">
         El nombre completo es obligatorio.
       </div>
 
-      <input
-        [(ngModel)]="email"
-        name="email"
-        type="email"
-        placeholder="Correo electrónico"
-        class="register-input"
-        required
-        email
-        #emailRef="ngModel"
-      />
+      <input [(ngModel)]="email" name="email" type="email" placeholder="Correo electrónico" class="register-input"
+        required email #emailRef="ngModel" />
 
       <div class="register-error" *ngIf="emailRef.invalid && emailRef.touched">
         <span *ngIf="emailRef.errors?.['required']">
@@ -82,23 +60,11 @@
 
       <div class="password-container">
 
-        <input
-          [(ngModel)]="password"
-          name="password"
-          [type]="showPassword ? 'text' : 'password'"
-          placeholder="Crear contraseña"
-          class="register-input password-input"
-          required
-          minlength="10"
-          pattern="^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{10,}$"
-          #passwordRef="ngModel"
-        />
+        <input [(ngModel)]="password" name="password" [type]="showPassword ? 'text' : 'password'"
+          placeholder="Crear contraseña" class="register-input password-input" required minlength="10"
+          pattern="^(?=.*[A-Z])(?=.*[^A-Za-z0-9 ]).{10,}$" #passwordRef="ngModel" />
 
-        <button
-          type="button"
-          class="toggle-password"
-          (click)="togglePassword()"
-        >
+        <button type="button" class="toggle-password" (click)="togglePassword()">
           <span class="material-icons">
             {{ showPassword ? 'visibility_off' : 'visibility' }}
           </span>
@@ -106,25 +72,30 @@
 
       </div>
 
-      <div class="register-error" *ngIf="passwordRef.invalid && passwordRef.touched">
-        <span *ngIf="passwordRef.errors?.['required']">
-          La contraseña es obligatoria.
-        </span>
+      <div class="password-requirements" *ngIf="passwordRef.touched || password.length > 0" aria-live="polite">
+        <p class="requirements-title">Tu contraseña debe incluir:</p>
 
-        <span *ngIf="passwordRef.errors?.['minlength']">
-          Debe tener al menos 10 caracteres.
-        </span>
+        <div class="password-requirement" [class.valid]="hasMinimumLength">
+          <span class="requirement-icon">{{ hasMinimumLength ? '✓' : '•' }}</span>
+          <span *ngIf="!hasMinimumLength">
+            10 caracteres (te {{ remainingCharacters === 1 ? 'falta' : 'faltan' }}
+            {{ remainingCharacters }} más)
+          </span>
+          <span *ngIf="hasMinimumLength">10 caracteres como mínimo</span>
+        </div>
 
-        <span *ngIf="passwordRef.errors?.['pattern']">
-          Debe incluir una mayúscula y un símbolo especial.
-        </span>
+        <div class="password-requirement" [class.valid]="hasUppercase">
+          <span class="requirement-icon">{{ hasUppercase ? '✓' : '•' }}</span>
+          Al menos una letra mayúscula
+        </div>
+
+        <div class="password-requirement" [class.valid]="hasSpecialCharacter">
+          <span class="requirement-icon">{{ hasSpecialCharacter ? '✓' : '•' }}</span>
+          Al menos un carácter especial (por ejemplo: !, &#64;, #, $)
+        </div>
       </div>
 
-      <button
-        type="submit"
-        [disabled]="loading || registerForm.invalid"
-        class="register-button"
-      >
+      <button type="submit" [disabled]="loading || registerForm.invalid" class="register-button">
         {{ loading ? 'Creando cuenta...' : 'Registrarme como tutor' }}
       </button>
 
@@ -160,18 +131,16 @@
       text-align: center;
     ">
       <div style="font-size: 3.8rem; margin-bottom: 15px;">🥳</div>
-      
+
       <h2 style="color: #2c3e50; font-size: 1.6rem; font-weight: 700; margin-bottom: 10px;">¡Cuenta Creada!</h2>
-      
+
       <p style="color: #666; margin: 0 0 25px 0; font-size: 0.95rem; line-height: 1.6;">
         Tu perfil de tutor ha sido configurado con éxito. <br>
         ¡Ya puedes ingresar para comenzar a gestionar la aventura saludable de tus niños! 🧒👧
       </p>
 
       <div style="display: flex; justify-content: center;">
-        <button 
-          type="button"
-          style="
+        <button type="button" style="
             width: 100%; 
             max-width: 220px; 
             background: linear-gradient(135deg, #4f46e5, #3b82f6);
@@ -187,8 +156,7 @@
           "
           onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 6px 18px rgba(59, 130, 246, 0.5)';"
           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 14px rgba(59, 130, 246, 0.35)';"
-          (click)="irAlLogin()"
-        >
+          (click)="irAlLogin()">
           Continuar al Login
         </button>
       </div>

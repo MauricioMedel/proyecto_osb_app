@@ -32,6 +32,22 @@ export class RegistroUsuarioComponent {
     this.showPassword = !this.showPassword;
   }
 
+  get hasMinimumLength(): boolean {
+    return this.password.length >= 10;
+  }
+
+  get hasUppercase(): boolean {
+    return /[A-Z]/.test(this.password);
+  }
+
+  get hasSpecialCharacter(): boolean {
+    return /[^A-Za-z0-9\s]/.test(this.password);
+  }
+
+  get remainingCharacters(): number {
+    return Math.max(0, 10 - this.password.length);
+  }
+
   register(): void {
     if (!this.username || !this.email || !this.password) {
       this.errorMsg = 'Completa todos los campos obligatorios';
