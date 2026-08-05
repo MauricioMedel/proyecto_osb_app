@@ -56,6 +56,8 @@ export class PanelComponent implements OnInit {
   childToDelete: Child | null = null;
   errorMessage = '';
   successMessage = '';
+  healthErrorMessage = '';
+  healthSuccessMessage = '';
 
   editingChild: Child | null = null;
   selectedChild: Child | null = null;
@@ -203,12 +205,15 @@ export class PanelComponent implements OnInit {
       height_cm: null
     };
 
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.healthErrorMessage = '';
+    this.healthSuccessMessage = '';
   }
 
   closeHealthForm() {
     this.selectedChild = null;
+    this.healthErrorMessage = '';
+    this.healthSuccessMessage = '';
+    this.healthLoading = false;
 
     this.healthForm = {
       age: null,
@@ -227,13 +232,14 @@ export class PanelComponent implements OnInit {
       !this.healthForm.weight_kg ||
       !this.healthForm.height_cm
     ) {
-      this.errorMessage = 'Completa edad, género, peso y estatura.';
+      this.healthErrorMessage = 'Completa edad, género, peso y estatura.';
+      this.healthSuccessMessage = '';
       return;
     }
 
     this.healthLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.healthErrorMessage = '';
+    this.healthSuccessMessage = '';
 
     this.http.post<any>(
       `${environment.apiUrl}/ml/children/${this.selectedChild.child_id}/health-metrics`,
@@ -242,18 +248,17 @@ export class PanelComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.healthLoading = false;
-        this.successMessage = 'Evaluación de salud registrada correctamente.';
+        this.healthSuccessMessage = 'Evaluación de salud registrada correctamente.';
 
         const metric = res.data?.metric;
         if (metric) {
           this.latestMetrics[this.selectedChild!.child_id] = metric;
         }
 
-        this.closeHealthForm();
       },
       error: () => {
         this.healthLoading = false;
-        this.errorMessage = 'No se pudo registrar la evaluación de salud.';
+        this.healthErrorMessage = 'No se pudo registrar la evaluación de salud.';
       }
     });
   }
