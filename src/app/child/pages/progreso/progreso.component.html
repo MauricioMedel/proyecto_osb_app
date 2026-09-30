@@ -1,5 +1,4 @@
 <div class="progress-page">
-
   <header class="top-bar">
     <button routerLink="/menu">← Volver</button>
 
@@ -12,79 +11,122 @@
   </header>
 
   <section class="progress-layout">
-
     <div class="activity-cards">
-
       <div class="ring-card">
-        <div class="lock-icon">🔒</div>
-        <div class="ring green">
-          <span>75%</span>
+<div
+  class="ring green"
+  [style.background]="
+    'conic-gradient(#22c55e ' +
+    (porcentajeHabitosHoy ?? 0) +
+    '%, #e2e8f0 0%)'
+  "
+>          
+          <span>
+            {{
+            porcentajeHabitosHoy === null
+            ? '—'
+            : porcentajeHabitosHoy + '%'
+            }}
+          </span>
         </div>
-        <h3>Súper Saltos</h3>
-        <p>75 / 100 saltos</p>
+
+        <h3>Hábitos completados hoy</h3>
+
+        <p *ngIf="porcentajeHabitosHoy !== null">
+          Cumplimiento de tus hábitos activos
+        </p>
+
+        <p *ngIf="cargandoSemana" role="status">
+          Cargando hábitos...
+        </p>
+
+        <p *ngIf="!cargandoSemana && porcentajeHabitosHoy === null">
+          Información no disponible
+        </p>
       </div>
 
       <div class="ring-card">
-        <div class="lock-icon">🔒</div>
-        <div class="ring blue">
-          <span>60%</span>
+        <div
+  class="ring blue"
+  [style.background]="
+    'conic-gradient(#2563eb ' +
+    (porcentajeJuego ?? 0) +
+    '%, #e2e8f0 0%)'
+  "
+>
+          <span>
+            {{
+            porcentajeJuego === null
+            ? '—'
+            : porcentajeJuego + '%'
+            }}
+          </span>
         </div>
-        <h3>Caminata Ligera</h3>
-        <p>4,800 / 8,000 pasos</p>
-      </div>
 
+        <h3>Avance en el juego</h3>
+
+        <p *ngIf="porcentajeJuego !== null">
+          {{ nivelesCompletados }} / {{ totalNiveles }}
+          niveles superados
+        </p>
+
+        <p *ngIf="cargandoJuego" role="status">
+          Cargando progreso...
+        </p>
+
+        <div *ngIf="errorJuego" role="alert">
+          <p>{{ errorJuego }}</p>
+
+          <button (click)="cargarProgresoJuego()" [disabled]="cargandoJuego">
+            Reintentar
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="energy-card">
-      <h2>Energía semanal 📊</h2>
+      <h2>Hábitos de los últimos 7 días 📊</h2>
 
-      <div class="chart">
-        <div class="bar-item">
-          <div class="bar green" style="height: 45%;"></div>
-          <span>LUN</span>
-        </div>
+      <p *ngIf="cargandoSemana" role="status">
+        Cargando progreso semanal...
+      </p>
 
-        <div class="bar-item">
-          <div class="bar green" style="height: 75%;"></div>
-          <span>MAR</span>
-        </div>
+      <div *ngIf="errorSemana" role="alert">
+        {{ errorSemana }}
 
-        <div class="bar-item">
-          <div class="bar blue" style="height: 35%;"></div>
-          <span>MIÉ</span>
-        </div>
+        <button (click)="cargarSemana()" [disabled]="cargandoSemana">
+          Reintentar
+        </button>
+      </div>
 
-        <div class="bar-item">
-          <div class="bar green" style="height: 20%;"></div>
-          <span>JUE</span>
-        </div>
+      <div class="chart" *ngIf="!cargandoSemana">
+        <div class="bar-item" *ngFor="let dia of semana; let index = index" [attr.title]="
+        dia.fecha + ': ' +
+        (dia.porcentaje === null
+          ? 'Sin información'
+          : dia.porcentaje + '% completado')
+      ">
+          <strong>
+            {{ dia.porcentaje === null ? '—' : dia.porcentaje + '%' }}
+          </strong>
 
-        <div class="bar-item">
-          <div class="bar blue" style="height: 60%;"></div>
-          <span>VIE</span>
-        </div>
+          <div class="bar" [class.green]="index % 2 === 0" [class.blue]="index % 2 !== 0"
+            [style.height.%]="dia.porcentaje ?? 0"></div>
 
-        <div class="bar-item">
-          <div class="bar green" style="height: 30%;"></div>
-          <span>SÁB</span>
-        </div>
-
-        <div class="bar-item">
-          <div class="bar blue" style="height: 15%;"></div>
-          <span>DOM</span>
+          <span>{{ dia.dia }}</span>
         </div>
       </div>
 
-      <div class="energy-summary">
-        <span>Mayor actividad: Martes</span>
-        <strong>120 pts</strong>
+      <div class="energy-summary" *ngIf="!cargandoSemana && semana.length">
+        <span>Mayor cumplimiento</span>
+        <strong>{{ mejorDiaSemana }}</strong>
       </div>
     </div>
 
     <div class="side-stats">
-
       <div class="mini-card">
         <span class="mini-icon fire">🔥</span>
+
         <div>
           <h3>250 kcal</h3>
           <p>Calorías quemadas</p>
@@ -92,90 +134,152 @@
       </div>
 
       <div class="mini-card">
-        <span class="mini-icon clock">🕒</span>
+        <span class="mini-icon fire">🔥</span>
+
         <div>
-          <h3>90 min</h3>
-          <p>Minutos activos</p>
+          <h3>
+            {{ dailySummary?.streak_days_at_date ?? '—' }} días
+          </h3>
+          <p>Racha registrada</p>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <span class="mini-icon clock">🕒</span>
+
+        <div>
+          <h3>
+            {{ dailySummary?.physical_activity_minutes ?? '—' }} min
+          </h3>
+          <p>Actividad física registrada hoy</p>
         </div>
       </div>
 
       <div class="goals-card">
         <h2>Metas saludables 🎯</h2>
 
-        <div class="goal-item">
-        <span>
-        💧 Agua
-        </span>
-      <strong>
-        {{aguaActual}} / {{aguaMeta}} vasos
-      </strong>
-        <button class="plus-btn" (click)="sumarAgua()">
-          +
-        </button>
+        <p *ngIf="cargandoMetas" role="status">
+          Cargando metas...
+        </p>
+
+        <p *ngIf="guardandoMeta" role="status">
+          Guardando registro...
+        </p>
+
+        <div *ngIf="errorMetas" role="alert">
+          {{ errorMetas }}
+
+          <button (click)="cargarHabitos()" [disabled]="
+              cargandoMetas ||
+              guardandoMeta ||
+              analizandoIA
+            ">
+            Reintentar
+          </button>
         </div>
 
         <div class="goal-item">
-        
-          <span>🥦 Comida </span>
-          <strong>{{comidaActual}} / {{comidaMeta}} porciones</strong>
-    
-        <button class="plus-btn" (click)="sumarComida()">+</button>
-      </div>
+          <span>💧 Agua</span>
+
+          <strong>
+            {{ fechaMetas && aguaHabitId ? aguaActual : '—' }}
+            /
+            {{ aguaMeta > 0 ? aguaMeta : '—' }} vasos
+          </strong>
+
+          <button class="plus-btn" aria-label="Registrar un vaso de agua" (click)="sumarAgua()" [disabled]="
+              cargandoMetas ||
+              guardandoMeta ||
+              analizandoIA ||
+              !fechaMetas ||
+              !aguaHabitId ||
+              aguaMeta <= 0 ||
+              aguaActual >= aguaMeta
+            ">
+            +
+          </button>
+        </div>
 
         <div class="goal-item">
-          
-            <span>😴 Sueño</span>
-            <strong>{{suenoActual}} / {{suenoMeta}} horas</strong>
-          
+          <span>🥦 Comida</span>
 
-          <button class="plus-btn" (click)="sumarSueno()">+</button>
+          <strong>
+            {{ fechaMetas && comidaHabitId ? comidaActual : '—' }}
+            /
+            {{ comidaMeta > 0 ? comidaMeta : '—' }} porciones
+          </strong>
+
+          <button class="plus-btn" aria-label="Registrar una porción de verduras" (click)="sumarComida()" [disabled]="
+              cargandoMetas ||
+              guardandoMeta ||
+              analizandoIA ||
+              !fechaMetas ||
+              !comidaHabitId ||
+              comidaMeta <= 0 ||
+              comidaActual >= comidaMeta
+            ">
+            +
+          </button>
+        </div>
+
+        <div class="goal-item">
+          <span>😴 Sueño</span>
+
+          <strong>
+            {{ fechaMetas && suenoHabitId ? suenoActual : '—' }}
+            /
+            {{ suenoMeta > 0 ? suenoMeta : '—' }} horas
+          </strong>
+
+          <button class="plus-btn" aria-label="Registrar una hora de sueño" (click)="sumarSueno()" [disabled]="
+              cargandoMetas ||
+              guardandoMeta ||
+              analizandoIA ||
+              !fechaMetas ||
+              !suenoHabitId ||
+              suenoMeta <= 0 ||
+              suenoActual >= suenoMeta
+            ">
+            +
+          </button>
         </div>
 
         <div class="ai-card">
+          <div class="ai-header">
+            <span class="ai-icon">🤖</span>
 
-            <div class="ai-header">
-              <span class="ai-icon">🤖</span>
-
-              <div>
-                <h2>Análisis Inteligente</h2>
-                <p>Conoce tu patrón saludable del día.</p>
-              </div>
+            <div>
+              <h2>Análisis Inteligente</h2>
+              <p>Conoce tu patrón saludable del día.</p>
             </div>
-
-            <button
-              class="ai-btn"
-              (click)="analizarPatronIA()"
-              [disabled]="analizandoIA">
-
-              <span *ngIf="!analizandoIA">
-                ✨ Analizar patrón IA
-              </span>
-
-              <span *ngIf="analizandoIA">
-                ⏳ Analizando...
-              </span>
-
-            </button>
-
           </div>
 
-          <div class="ai-result" *ngIf="mlResult">
+          <button class="ai-btn" (click)="analizarPatronIA()" [disabled]="
+              analizandoIA ||
+              cargandoMetas ||
+              guardandoMeta ||
+              !summaryId
+            ">
+            <span *ngIf="!analizandoIA">
+              ✨ Analizar patrón IA
+            </span>
 
-            <h3>🧠 Resultado IA</h3>
+            <span *ngIf="analizandoIA">
+              ⏳ Analizando...
+            </span>
+          </button>
 
-            <div class="cluster">
-                Cluster {{mlResult.cluster_id}}
-            </div>
+          <p *ngIf="errorIA" role="alert">
+            {{ errorIA }}
+          </p>
+        </div>
 
-            <p>
-                {{mlResult.message}}
-            </p>
+        <div class="ai-result" *ngIf="mlResult">
+          <h3>🧠 Resultado IA</h3>
 
-          </div>
+          <p>{{ mlResult.message }}</p>
+        </div>
       </div>
-
     </div>
-
   </section>
-
 </div>
