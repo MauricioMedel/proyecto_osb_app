@@ -162,6 +162,7 @@
       <button
         class="next-btn"
         (click)="closeChallenge()"
+        [disabled]="savingResult"
       >
         Volver al mapa
       </button>
@@ -170,7 +171,7 @@
 
     <div
       class="modal-feedback"
-      *ngIf="feedbackMessage && !quizFinished"
+      *ngIf="feedbackMessage"
     >
       {{ feedbackMessage }}
     </div>

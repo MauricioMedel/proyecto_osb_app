@@ -41,7 +41,7 @@ export class JugarComponent implements OnInit {
 
   selectedLevel: Level | null = null;
   selectedAnswer = '';
-  isAnswerRevealed = false; // Bloquea clics múltiples mientras muestra si es correcto/incorrecto
+  isAnswerRevealed = false; 
 
   quiz: QuizQuestion[] = [];
   currentQuestionIndex = 0;
@@ -59,6 +59,8 @@ export class JugarComponent implements OnInit {
   };
 
   levels: Level[] = [];
+
+  savingResult = false;
 
   constructor(
     private router: Router,
@@ -80,42 +82,38 @@ export class JugarComponent implements OnInit {
     });
   }
 
-  loadLevels() {
-    if (!this.childId) {
-      this.setDefaultLevels();
-      this.loading = false;
-      return;
-    }
+ loadLevels() {
+  this.loading = true;
+  this.errorMessage = '';
 
-    this.http.get<any>(
-      `${environment.apiUrl}/children/${this.childId}/challenges`,
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: (res) => {
-        const apiChallenges = res.data || [];
-
-        if (apiChallenges.length === 0) {
-          this.setDefaultLevels();
-        } else {
-          // Lógica para mapear niveles desde BD si los tienes guardados individualmente
-          this.levels = apiChallenges.map((item: any, index: number) => ({
-            id: item.child_challenge_id,
-            levelNumber: index + 1,
-            title: item.title || `Nivel ${index + 1}`,
-            description: item.description || 'Completa este reto saludable.',
-            status: this.getLevelStatus(item.status, index),
-            points: item.points_reward || this.calculatePoints(index + 1),
-            icon: this.getLevelIcon(index)
-          }));
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.setDefaultLevels();
-        this.loading = false;
-      }
-    });
+  if (!this.childId) {
+    this.loading = false;
+    this.errorMessage = 'Inicia sesión con una cuenta de niño.';
+    return;
   }
+
+  this.http.get<any>(
+    `${environment.apiUrl}/ml/children/${this.childId}/game-progress`,
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: (res) => {
+      this.levels = res.data.levels.map(
+        (level: any, index: number) => ({
+          ...level,
+          icon: this.getLevelIcon(index)
+        })
+      );
+
+      this.loading = false;
+    },
+    error: () => {
+      this.levels = [];
+      this.loading = false;
+      this.errorMessage =
+        'No se pudo cargar tu progreso. Intenta nuevamente.';
+    }
+  });
+}
 
   getLevelStatus(status: string, index: number): 'completed' | 'unlocked' | 'locked' {
     if (status === 'completed') return 'completed';
@@ -245,43 +243,49 @@ export class JugarComponent implements OnInit {
     }, 1500);
   }
 
- finishQuiz() {
-    this.quizFinished = true;
-    
-    // Regla de Negocio: Se requiere el 80% (4 de 5 correctas)
-    const percentage = (this.score / this.quiz.length) * 100;
-    this.passedLevel = percentage >= 80;
-
-    let xpEarned = 0;
-
-    if (this.passedLevel) {
-      xpEarned = this.selectedLevel?.points || 50;
-      if (percentage === 100) xpEarned += Math.round(xpEarned * 0.2); // 20% bonus perfecto
-      this.feedbackMessage = `🎉 ¡Nivel Superado! Ganaste ${xpEarned} XP`;
-    } else {
-      xpEarned = 10; // XP de consolación
-      this.feedbackMessage = `💪 Estuviste cerca. Necesitas al menos 4 correctas. Obtuviste ${this.score}/5.`;
-    }
-
-    // Persistir resultado en base de datos
-    this.http.post(
-      `${environment.apiUrl}/ml/children/${this.childId}/quiz-result`,
-      {
-        topic: this.selectedTopic, // <--- FALTABA ESTA LÍNEA
-        level: this.selectedLevel?.levelNumber,
-        score: this.score,
-        totalQuestions: this.quiz.length,
-        percentage,
-        xpEarned,
-        passed: this.passedLevel
-      },
-      { headers: this.getHeaders() }
-    ).subscribe();
-
-    if (this.passedLevel) {
-      this.completeSelectedLevel();
-    }
+finishQuiz() {
+  if (
+    !this.childId ||
+    !this.selectedLevel ||
+    !this.quiz.length ||
+    this.savingResult ||
+    this.quizFinished
+  ) {
+    return;
   }
+
+  this.quizFinished = true;
+  this.savingResult = true;
+  this.passedLevel = false;
+  this.feedbackMessage = 'Guardando resultado...';
+
+  this.http.post<any>(
+    `${environment.apiUrl}/ml/children/${this.childId}/quiz-result`,
+    {
+      topic: this.selectedTopic,
+      level: this.selectedLevel.levelNumber,
+      score: this.score,
+      totalQuestions: this.quiz.length
+    },
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: (res) => {
+      this.savingResult = false;
+      this.passedLevel = res.data.passed;
+
+      this.feedbackMessage = this.passedLevel
+        ? `🎉 ¡Nivel superado! Ganaste ${res.data.xpEarned} XP.`
+        : `Obtuviste ${this.score}/${this.quiz.length}. Necesitas al menos el 80% para avanzar.`;
+
+      this.loadLevels();
+    },
+    error: () => {
+      this.savingResult = false;
+      this.feedbackMessage =
+        'No se pudo guardar el resultado. Cierra el reto y vuelve a intentarlo.';
+    }
+  });
+}
 
   completeSelectedLevel() {
     if (!this.selectedLevel) return;
@@ -336,6 +340,8 @@ export class JugarComponent implements OnInit {
   }
 
   closeChallenge() {
+    if (this.savingResult) return;
+    
     this.selectedLevel = null;
     this.feedbackMessage = '';
     this.selectedAnswer = '';
