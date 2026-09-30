@@ -14,9 +14,15 @@ export class MlService {
 
   // 1. NUEVO: Traer los datos guardados de la BD para el usuario
   // Esto hará que al recargar la página, los contadores ya tengan los valores reales
-  getDailySummary(childId: string): Observable<any> {
+  getDailySummary(
+  childId: string,
+  date?: string
+): Observable<any> {
   return this.http.get(
-    `${this.apiUrl}/ml/daily-summary/${childId}`
+    `${this.apiUrl}/ml/daily-summary/${childId}`,
+    {
+      params: date ? { date } : {}
+    }
   );
 }
 
