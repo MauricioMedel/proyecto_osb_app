@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../services/auth.service';
+import { catchError, forkJoin, of } from 'rxjs';
+import { HabitService } from '../../../services/habit.service';
 
 interface Child {
   child_id: string;
@@ -71,11 +73,31 @@ export class PanelComponent implements OnInit {
     height_cm: null
   };
 
+  loadingSummary = false;
+  summaryError = '';
+
+  totalNivelesSuperados: number | null = null;
+  totalTrofeos: number | null = null;
+
+  progresoPorNino: Record<
+    string,
+    {
+      nivelesSuperados: number;
+      totalNiveles: number;
+      trofeosObtenidos: number;
+    } | null
+  > = {};
+
+  actividadSemanal: number | null = null;
+loadingWeekly = false;
+weeklyError = '';
+
   constructor(
-    private router: Router,
-    private http: HttpClient,
-    private auth: AuthService
-  ) { }
+  private router: Router,
+  private http: HttpClient,
+  private auth: AuthService,
+  private habitService: HabitService
+) {}
 
   ngOnInit() {
     const user = this.auth.getCurrentUser();
@@ -91,9 +113,17 @@ export class PanelComponent implements OnInit {
     });
   }
 
-  getChildren() {
+  getChildren(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.summaryError = '';
+
+    this.totalNivelesSuperados = null;
+    this.totalTrofeos = null;
+    this.progresoPorNino = {};
+
+    this.actividadSemanal = null;
+this.weeklyError = '';
 
     this.http.get<any>(`${environment.apiUrl}/children`, {
       headers: this.getHeaders()
@@ -101,8 +131,12 @@ export class PanelComponent implements OnInit {
       next: (res) => {
         this.children = res.data || [];
         this.loading = false;
+        
 
-        this.children.forEach(child => {
+        this.cargarResumenJuego();
+        this.cargarActividadSemanal();
+
+        this.children.forEach((child) => {
           this.getLatestHealthMetric(child.child_id);
         });
       },
@@ -113,6 +147,187 @@ export class PanelComponent implements OnInit {
     });
   }
 
+  cargarActividadSemanal(): void {
+  if (this.loading || this.loadingWeekly) {
+    return;
+  }
+
+  this.loadingWeekly = true;
+  this.weeklyError = '';
+  this.actividadSemanal = null;
+
+  if (this.children.length === 0) {
+    this.actividadSemanal = 0;
+    this.loadingWeekly = false;
+    return;
+  }
+
+  const fechas = Array.from({ length: 7 }, (_, index) => {
+    const fecha = new Date();
+
+    fecha.setHours(12, 0, 0, 0);
+    fecha.setDate(fecha.getDate() - (6 - index));
+
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  });
+
+  const consultas = this.children.flatMap((child) =>
+    fechas.map((fecha) =>
+      this.habitService.getHabits(child.child_id, fecha).pipe(
+        catchError(() => of(null))
+      )
+    )
+  );
+
+  forkJoin({
+    catalogo: this.habitService.getCatalog(),
+    registros: forkJoin(consultas)
+  }).subscribe({
+    next: ({ catalogo, registros }: any) => {
+      const catalog = catalogo.data ?? catalogo;
+
+      const activos = catalog.filter(
+        (habit: any) => habit.is_active !== false
+      );
+
+      if (activos.length === 0) {
+        this.loadingWeekly = false;
+        this.weeklyError =
+          'No hay hábitos activos para calcular el cumplimiento.';
+        return;
+      }
+
+      if (registros.some((respuesta: any) => respuesta === null)) {
+        this.loadingWeekly = false;
+        this.weeklyError =
+          'No se pudo consultar la semana completa de todos los niños.';
+        return;
+      }
+
+      const idsActivos = new Set(
+        activos.map((habit: any) => habit.habit_id)
+      );
+
+      let totalCompletados = 0;
+
+      registros.forEach((respuesta: any) => {
+        const habits = respuesta.data ?? [];
+
+        const completados = new Set(
+          habits
+            .filter(
+              (habit: any) =>
+                idsActivos.has(habit.habit_id) &&
+                habit.is_completed === true
+            )
+            .map((habit: any) => habit.habit_id)
+        );
+
+        totalCompletados += completados.size;
+      });
+
+      const totalEsperado = registros.length * activos.length;
+
+      this.actividadSemanal = Math.round(
+        (totalCompletados / totalEsperado) * 100
+      );
+
+      this.loadingWeekly = false;
+    },
+    error: () => {
+      this.loadingWeekly = false;
+      this.weeklyError =
+        'No se pudo cargar el cumplimiento semanal.';
+    }
+  });
+}
+
+  cargarResumenJuego(): void {
+    if (this.loading || this.loadingSummary) {
+      return;
+    }
+
+    this.loadingSummary = true;
+    this.summaryError = '';
+    this.totalNivelesSuperados = null;
+    this.totalTrofeos = null;
+    this.progresoPorNino = {};
+
+    if (this.children.length === 0) {
+      this.totalNivelesSuperados = 0;
+      this.totalTrofeos = 0;
+      this.loadingSummary = false;
+      return;
+    }
+
+    const children = [...this.children];
+
+    const consultas = children.map((child) =>
+      this.http.get<any>(
+        `${environment.apiUrl}/ml/children/${child.child_id}/game-progress`,
+        { headers: this.getHeaders() }
+      ).pipe(
+        catchError(() => of(null))
+      )
+    );
+
+    forkJoin(consultas).subscribe({
+      next: (respuestas) => {
+        let niveles = 0;
+        let trofeos = 0;
+        let hayErrores = false;
+
+        respuestas.forEach((respuesta, index) => {
+          const childId = children[index].child_id;
+          const progreso = respuesta?.data;
+
+          if (
+            !Array.isArray(progreso?.completedLevels) ||
+            !Array.isArray(progreso?.levels) ||
+            !Array.isArray(progreso?.trophies)
+          ) {
+            this.progresoPorNino[childId] = null;
+            hayErrores = true;
+            return;
+          }
+
+          const nivelesSuperados = progreso.completedLevels.length;
+
+          const trofeosObtenidos = progreso.trophies.filter(
+            (trophy: any) => trophy.unlocked === true
+          ).length;
+
+          this.progresoPorNino[childId] = {
+            nivelesSuperados,
+            totalNiveles: progreso.levels.length,
+            trofeosObtenidos
+          };
+
+          niveles += nivelesSuperados;
+          trofeos += trofeosObtenidos;
+        });
+
+        if (hayErrores) {
+          this.summaryError =
+            'No se pudo consultar el progreso de todos los niños.';
+        } else {
+          this.totalNivelesSuperados = niveles;
+          this.totalTrofeos = trofeos;
+        }
+
+        this.loadingSummary = false;
+      },
+      error: () => {
+        this.loadingSummary = false;
+        this.summaryError =
+          'No se pudo cargar el resumen del juego.';
+      }
+    });
+  }
   openEdit(child: Child) {
     this.editingChild = { ...child };
   }
@@ -161,37 +376,37 @@ export class PanelComponent implements OnInit {
   }
 
   deleteChild(child: Child) {
-  this.childToDelete = child;
-  this.showDeleteModal = true;
-}
+    this.childToDelete = child;
+    this.showDeleteModal = true;
+  }
 
   // 🌟 NUEVO: Ejecuta la eliminación real cuando presionan "Sí, eliminar"
   confirmarEliminar() {
 
-  if (!this.childToDelete) return;
+    if (!this.childToDelete) return;
 
-  this.showDeleteModal = false;
-  this.actionLoading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
+    this.showDeleteModal = false;
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-  this.http.delete<any>(
-    `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
-    { headers: this.getHeaders() }
-  ).subscribe({
-    next: () => {
-      this.actionLoading = false;
-      this.successMessage = 'Niño eliminado correctamente.';
-      this.childToDelete = null;
-      this.getChildren();
-    },
-    error: () => {
-      this.actionLoading = false;
-      this.errorMessage = 'No se pudo eliminar el niño.';
-      this.childToDelete = null;
-    }
-  });
-}
+    this.http.delete<any>(
+      `${environment.apiUrl}/children/${this.childToDelete.child_id}`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: () => {
+        this.actionLoading = false;
+        this.successMessage = 'Niño eliminado correctamente.';
+        this.childToDelete = null;
+        this.getChildren();
+      },
+      error: () => {
+        this.actionLoading = false;
+        this.errorMessage = 'No se pudo eliminar el niño.';
+        this.childToDelete = null;
+      }
+    });
+  }
 
   openHealthForm(child: Child) {
     this.selectedChild = child;

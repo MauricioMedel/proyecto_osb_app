@@ -1,127 +1,339 @@
 <div class="guardian-page">
-
   <header class="guardian-header">
     <div>
       <h1>Panel del Tutor</h1>
-      <p>Hola, {{ tutorName }} 👋 Supervisa el avance de tus niños.</p>
+      <p>
+        Hola, {{ tutorName }} 👋 Supervisa el avance de tus niños.
+      </p>
     </div>
 
-    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+    <button
+      type="button"
+      class="logout-btn"
+      (click)="logout()"
+    >
+      Cerrar sesión
+    </button>
   </header>
 
   <section class="summary-grid">
     <div class="summary-card blue">
-      <span>👧🧒</span>
+      <span aria-hidden="true">👧🧒</span>
       <h3>Niños registrados</h3>
-      <p>{{ children.length }}</p>
-    </div>
-
-    <div class="summary-card green">
-      <span>🏆</span>
-      <h3>Retos completados</h3>
-      <p>0</p>
-    </div>
-
-    <div class="summary-card yellow">
-      <span>⭐</span>
-      <h3>Recompensas</h3>
-      <p>0</p>
+      <p>{{ loading ? '…' : children.length }}</p>
     </div>
 
     <div class="summary-card purple">
-      <span>📊</span>
-      <h3>Actividad semanal</h3>
-      <p>0%</p>
+      <span aria-hidden="true">📊</span>
+      <h3>Hábitos: promedio de todos los niños</h3>
+
+      <p>
+        {{
+          loading || loadingWeekly
+            ? '…'
+            : actividadSemanal === null
+              ? '—'
+              : actividadSemanal + '%'
+        }}
+      </p>
+
+      <small>Últimos 7 días</small>
     </div>
   </section>
 
-  <section class="main-content">
+  <div
+    *ngIf="weeklyError"
+    class="error-message"
+    role="alert"
+  >
+    {{ weeklyError }}
 
+    <button
+      type="button"
+      class="retry-btn"
+      (click)="cargarActividadSemanal()"
+      [disabled]="loading || loadingWeekly"
+    >
+      Reintentar
+    </button>
+  </div>
+
+  <div
+    *ngIf="summaryError"
+    class="error-message"
+    role="alert"
+  >
+    {{ summaryError }}
+
+    <button
+      type="button"
+      class="retry-btn"
+      (click)="cargarResumenJuego()"
+      [disabled]="loading || loadingSummary"
+    >
+      Reintentar
+    </button>
+  </div>
+
+  <section class="main-content">
     <div class="children-section">
       <div class="section-header">
         <h2>Mis niños</h2>
 
-        <button class="primary-btn" routerLink="/panel/registrar-nino">
+        <button
+          type="button"
+          class="primary-btn"
+          routerLink="/panel/registrar-nino"
+        >
           + Registrar niño
         </button>
       </div>
 
-      <p *ngIf="loading" class="loading-text">Cargando niños...</p>
+      <p
+        *ngIf="loading"
+        class="loading-text"
+        role="status"
+      >
+        Cargando niños...
+      </p>
 
-      <div *ngIf="actionLoading" class="loading-message">
+      <div
+        *ngIf="actionLoading"
+        class="loading-message"
+        role="status"
+      >
         Procesando solicitud...
       </div>
 
-      <div *ngIf="successMessage" class="success-message">
+      <div
+        *ngIf="successMessage"
+        class="success-message"
+        role="status"
+      >
         {{ successMessage }}
       </div>
 
-      <div *ngIf="errorMessage" class="error-message">
+      <div
+        *ngIf="errorMessage"
+        class="error-message"
+        role="alert"
+      >
         {{ errorMessage }}
       </div>
 
-      <div *ngIf="!loading && children.length === 0" class="empty-card">
-        <div class="empty-icon">👦</div>
-        <h3>Aún no tienes niños registrados</h3>
-        <p>Registra un niño para comenzar a dar seguimiento a sus hábitos saludables.</p>
+      <div
+        *ngIf="!loading && !errorMessage && children.length === 0"
+        class="empty-card"
+      >
+        <div class="empty-icon" aria-hidden="true">👦</div>
 
-        <button class="primary-btn" routerLink="/panel/registrar-nino">
+        <h3>Aún no tienes niños registrados</h3>
+
+        <p>
+          Registra un niño para comenzar a dar seguimiento
+          a sus hábitos saludables.
+        </p>
+
+        <button
+          type="button"
+          class="primary-btn"
+          routerLink="/panel/registrar-nino"
+        >
           Registrar primer niño
         </button>
       </div>
 
-      <div *ngIf="!loading && children.length > 0" class="children-grid">
-        <div class="child-card" *ngFor="let child of children">
+      <div
+        *ngIf="!loading && children.length > 0"
+        class="children-grid"
+      >
+        <details
+          class="child-card"
+          *ngFor="let child of children"
+        >
+          <!-- Encabezado del acordeón -->
+          <summary class="child-identity">
+            <span class="child-avatar" aria-hidden="true">
+              {{
+                child.avatar_code === 'avatar_2'
+                  ? '👧'
+                  : child.avatar_code === 'avatar_3'
+                    ? '🧢'
+                    : child.avatar_code === 'avatar_4'
+                      ? '⭐'
+                      : '🧒'
+              }}
+            </span>
 
-          <div class="child-avatar">
-            {{ child.avatar_code === 'avatar_2' ? '👧' : '🧒' }}
-          </div>
+            <span class="child-info">
+              <span class="child-name">
+                {{ child.nickname }}
+              </span>
 
-          <div class="child-info">
-            <h3>{{ child.nickname }}</h3>
-            <p>Edad: {{ child.age_range }} años</p>
-            <p>Nivel: {{ child.level_name || 'Inicial' }}</p>
-            <p>XP: {{ child.current_xp || 0 }}</p>
-            <p>Racha: {{ child.streak_days || 0 }} días</p>
+              <span class="child-age">
+                Edad: {{ child.age_range }} años
+              </span>
+            </span>
 
-            <div class="ml-card" *ngIf="latestMetrics[child.child_id] as metric">
-              <div class="ml-header">
-                <span></span>
-                <h4>Evaluación de salud</h4>
+            <span class="accordion-arrow" aria-hidden="true">
+              ⌄
+            </span>
+          </summary>
+
+          <!-- Progreso individual -->
+          <section class="child-progress">
+            <h4>Progreso de {{ child.nickname }}</h4>
+
+            <div class="child-stats">
+              <div class="child-stat">
+                <span>🎯 Nivel</span>
+
+                <strong>
+                  {{ child.level_name || 'Inicial' }}
+                </strong>
               </div>
 
+              <div class="child-stat">
+                <span>⭐ Experiencia</span>
+
+                <strong>
+                  {{ child.current_xp }} XP
+                </strong>
+              </div>
+
+              <div class="child-stat">
+                <span>🏆 Niveles superados</span>
+
+                <strong *ngIf="loadingSummary">…</strong>
+
+                <ng-container *ngIf="!loadingSummary">
+                  <strong
+                    *ngIf="
+                      progresoPorNino[child.child_id] as progreso;
+                      else nivelesNoDisponibles
+                    "
+                  >
+                    {{ progreso.nivelesSuperados }}
+                    / {{ progreso.totalNiveles }}
+                  </strong>
+
+                  <ng-template #nivelesNoDisponibles>
+                    <strong>—</strong>
+                  </ng-template>
+                </ng-container>
+              </div>
+
+              <div class="child-stat">
+                <span>🏅 Trofeos obtenidos</span>
+
+                <strong *ngIf="loadingSummary">…</strong>
+
+                <ng-container *ngIf="!loadingSummary">
+                  <strong
+                    *ngIf="
+                      progresoPorNino[child.child_id] as progreso;
+                      else trofeosNoDisponibles
+                    "
+                  >
+                    {{ progreso.trofeosObtenidos }}
+                  </strong>
+
+                  <ng-template #trofeosNoDisponibles>
+                    <strong>—</strong>
+                  </ng-template>
+                </ng-container>
+              </div>
+            </div>
+
+            <p class="child-streak">
+              🔥 Racha: {{ child.streak_days }} días
+            </p>
+
+            <p
+              *ngIf="
+                !loadingSummary &&
+                !progresoPorNino[child.child_id]
+              "
+              class="child-progress-error"
+              role="status"
+            >
+              El progreso de este niño no está disponible.
+            </p>
+          </section>
+
+          <!-- Evaluación de salud -->
+          <section class="child-health">
+            <h4>Evaluación de salud</h4>
+
+            <div
+              class="ml-card"
+              *ngIf="
+                latestMetrics[child.child_id] as metric;
+                else sinEvaluacion
+              "
+            >
               <div class="ml-info">
-                <p><strong>IMC:</strong> {{ metric.bmi }}</p>
+                <p>
+                  <strong>IMC:</strong>
+                  {{ metric.bmi }}
+                </p>
 
                 <p>
-                  <strong>Nivel de obesidad:</strong>
-                  <span [ngClass]="getRiskClass(metric.risk_level)">
+                  <strong>Clasificación estimada:</strong>
+
+                  <span
+                    [ngClass]="getRiskClass(metric.risk_level)"
+                  >
                     {{ metric.risk_level | titlecase }}
                   </span>
                 </p>
 
                 <p>
-                  <strong>Confianza:</strong>
-                  {{ (+metric.prediction_confidence * 100) | number:'1.0-0' }}%
+                  <strong>Confianza del modelo:</strong>
+                  {{
+                    (+metric.prediction_confidence * 100)
+                      | number:'1.0-0'
+                  }}%
                 </p>
               </div>
             </div>
 
-            <div class="ml-empty" *ngIf="!latestMetrics[child.child_id]">
-               Sin evaluación de salud registrada.
+            <ng-template #sinEvaluacion>
+              <div class="ml-empty">
+                No hay una evaluación disponible para mostrar.
+              </div>
+            </ng-template>
+
+            <div class="child-actions">
+              <button
+                type="button"
+                class="health-btn"
+                (click)="openHealthForm(child)"
+                [disabled]="actionLoading || healthLoading"
+              >
+                Evaluar salud
+              </button>
+
+              <button
+                type="button"
+                class="edit-btn"
+                (click)="openEdit(child)"
+                [disabled]="actionLoading"
+              >
+                Editar perfil
+              </button>
+
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="deleteChild(child)"
+                [disabled]="actionLoading"
+              >
+                Eliminar perfil
+              </button>
             </div>
-          </div>
-
-          <div class="child-actions">
-            <button class="health-btn" (click)="openHealthForm(child)">
-              Evaluar salud
-            </button>
-
-            <button class="edit-btn" (click)="openEdit(child)">Editar</button>
-            <button class="delete-btn" (click)="deleteChild(child)">Eliminar</button>
-          </div>
-
-        </div>
+          </section>
+        </details>
       </div>
     </div>
 
@@ -129,49 +341,70 @@
       <h2>Resumen del tutor</h2>
 
       <p>
-        Desde este panel podrás registrar niños, revisar su progreso,
-        consultar hábitos, logros y tiempo de pantalla.
+        Selecciona un niño para revisar su progreso individual,
+        sus niveles superados, trofeos y evaluación de salud.
       </p>
 
       <div class="tip">
-        <span>💡</span>
-        <p>Motiva al niño a completar retos diarios.</p>
+        <span aria-hidden="true">💡</span>
+        <p>Motiva a cada niño a completar sus retos.</p>
       </div>
 
       <div class="tip">
-        <span>🥦</span>
-        <p>Revisa sus hábitos de alimentación saludable.</p>
+        <span aria-hidden="true">🥦</span>
+        <p>Acompaña sus hábitos de alimentación saludable.</p>
       </div>
 
       <div class="tip">
-        <span>🏃</span>
-        <p>Supervisa su actividad física semanal.</p>
+        <span aria-hidden="true">🏅</span>
+        <p>Reconoce sus avances y celebra sus logros.</p>
       </div>
 
       <div class="tip ai-tip">
-        <span>🤖</span>
-        <p>Utiliza la evaluación IA para conocer el riesgo estimado.</p>
+        <span aria-hidden="true">🤖</span>
+        <p>
+          Consulta la evaluación de salud registrada para cada niño.
+        </p>
       </div>
     </aside>
-
   </section>
 
+  <!-- Modal: editar perfil -->
   <div class="modal-backdrop" *ngIf="editingChild">
-    <div class="modal-card">
-      <h2>Editar niño</h2>
+    <div
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-title"
+    >
+      <h2 id="edit-title">Editar niño</h2>
 
-      <label>Apodo</label>
-      <input type="text" [(ngModel)]="editingChild.nickname" placeholder="Nombre o apodo" />
+      <label for="edit-nickname">Apodo</label>
+      <input
+        id="edit-nickname"
+        type="text"
+        [(ngModel)]="editingChild.nickname"
+        placeholder="Nombre o apodo"
+        [disabled]="actionLoading"
+      />
 
-      <label>Rango de edad</label>
-      <select [(ngModel)]="editingChild.age_range">
+      <label for="edit-age">Rango de edad</label>
+      <select
+        id="edit-age"
+        [(ngModel)]="editingChild.age_range"
+        [disabled]="actionLoading"
+      >
         <option value="6-8">6 a 8 años</option>
         <option value="9-10">9 a 10 años</option>
         <option value="11-12">11 a 12 años</option>
       </select>
 
-      <label>Avatar</label>
-      <select [(ngModel)]="editingChild.avatar_code">
+      <label for="edit-avatar">Avatar</label>
+      <select
+        id="edit-avatar"
+        [(ngModel)]="editingChild.avatar_code"
+        [disabled]="actionLoading"
+      >
         <option value="avatar_1">Niño 🧒</option>
         <option value="avatar_2">Niña 👧</option>
         <option value="avatar_3">Gorra 🧢</option>
@@ -179,20 +412,38 @@
       </select>
 
       <div class="modal-actions">
-        <button class="cancel-btn" (click)="closeEdit()">Cancelar</button>
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeEdit()"
+          [disabled]="actionLoading"
+        >
+          Cancelar
+        </button>
 
-        <button class="primary-btn" (click)="updateChild()" [disabled]="actionLoading">
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="updateChild()"
+          [disabled]="actionLoading"
+        >
           {{ actionLoading ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
     </div>
   </div>
 
+  <!-- Modal: eliminar perfil -->
   <div class="modal-backdrop" *ngIf="showDeleteModal">
-    <div class="modal-card delete-modal">
-      <div class="warning-icon">⚠️</div>
+    <div
+      class="modal-card delete-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+    >
+      <div class="warning-icon" aria-hidden="true">⚠️</div>
 
-      <h2>¿Estás seguro?</h2>
+      <h2 id="delete-title">¿Estás seguro?</h2>
 
       <p>
         Estás a punto de eliminar el perfil de
@@ -201,65 +452,123 @@
       </p>
 
       <div class="modal-actions">
-        <button type="button" class="cancel-btn" (click)="showDeleteModal = false; childToDelete = null">
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="showDeleteModal = false; childToDelete = null"
+          [disabled]="actionLoading"
+        >
           Cancelar
         </button>
 
-        <button type="button" class="confirm-delete-btn" (click)="confirmarEliminar()">
+        <button
+          type="button"
+          class="confirm-delete-btn"
+          (click)="confirmarEliminar()"
+          [disabled]="actionLoading"
+        >
           Sí, eliminar
         </button>
       </div>
     </div>
   </div>
 
+  <!-- Modal: evaluación de salud -->
   <div class="modal-backdrop" *ngIf="selectedChild">
-    <div class="modal-card health-modal">
-      <h2>Evaluación de salud</h2>
+    <div
+      class="modal-card health-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="health-title"
+    >
+      <h2 id="health-title">Evaluación de salud</h2>
 
       <p class="modal-description">
         Registra los datos físicos de
         <strong>{{ selectedChild.nickname }}</strong>
-        para conocer su nivel de bienestar y recibir recomendaciones personalizadas.
+        para obtener una evaluación estimada.
       </p>
 
-      <div *ngIf="healthErrorMessage" class="modal-alert modal-alert-error" role="alert">
+      <div
+        *ngIf="healthErrorMessage"
+        class="modal-alert modal-alert-error"
+        role="alert"
+      >
         <span aria-hidden="true">⚠️</span>
         <span>{{ healthErrorMessage }}</span>
       </div>
 
-      <div *ngIf="healthSuccessMessage" class="modal-alert modal-alert-success" role="status">
+      <div
+        *ngIf="healthSuccessMessage"
+        class="modal-alert modal-alert-success"
+        role="status"
+      >
         <span aria-hidden="true">✅</span>
         <span>{{ healthSuccessMessage }}</span>
       </div>
 
       <ng-container *ngIf="!healthSuccessMessage">
-        <label>Edad</label>
-        <input type="number" [(ngModel)]="healthForm.age" placeholder="Ej. 11" />
+        <label for="health-age">Edad</label>
+        <input
+          id="health-age"
+          type="number"
+          [(ngModel)]="healthForm.age"
+          placeholder="Ej. 11"
+          [disabled]="healthLoading"
+        />
 
-        <label>Género</label>
-        <select [(ngModel)]="healthForm.gender">
+        <label for="health-gender">Género</label>
+        <select
+          id="health-gender"
+          [(ngModel)]="healthForm.gender"
+          [disabled]="healthLoading"
+        >
           <option value="">Selecciona una opción</option>
           <option value="female">Femenino</option>
           <option value="male">Masculino</option>
         </select>
 
-        <label>Peso en kg</label>
-        <input type="number" [(ngModel)]="healthForm.weight_kg" placeholder="Ej. 55" />
+        <label for="health-weight">Peso en kg</label>
+        <input
+          id="health-weight"
+          type="number"
+          step="0.1"
+          [(ngModel)]="healthForm.weight_kg"
+          placeholder="Ej. 55"
+          [disabled]="healthLoading"
+        />
 
-        <label>Estatura en cm</label>
-        <input type="number" [(ngModel)]="healthForm.height_cm" placeholder="Ej. 145" />
+        <label for="health-height">Estatura en cm</label>
+        <input
+          id="health-height"
+          type="number"
+          step="0.1"
+          [(ngModel)]="healthForm.height_cm"
+          placeholder="Ej. 145"
+          [disabled]="healthLoading"
+        />
       </ng-container>
 
       <div class="modal-actions">
-        <button class="cancel-btn" (click)="closeHealthForm()">
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeHealthForm()"
+          [disabled]="healthLoading"
+        >
           {{ healthSuccessMessage ? 'Cerrar' : 'Cancelar' }}
         </button>
 
-        <button *ngIf="!healthSuccessMessage" class="primary-btn" (click)="submitHealthMetric()" [disabled]="healthLoading">
+        <button
+          *ngIf="!healthSuccessMessage"
+          type="button"
+          class="primary-btn"
+          (click)="submitHealthMetric()"
+          [disabled]="healthLoading"
+        >
           {{ healthLoading ? 'Evaluando...' : 'Obtener evaluación' }}
         </button>
       </div>
     </div>
   </div>
-
 </div>
