@@ -371,6 +371,23 @@ finishQuiz() {
     
     return isEvenRow ? 20 + (posInRow * 30) : 80 - (posInRow * 30);
   }
+  
+  getPathSegment(index: number): string {
+  const x1 = this.getNodeLeft(index);
+  const y1 = this.getNodeTop(index);
+
+  const x2 = this.getNodeLeft(index + 1);
+  const y2 = this.getNodeTop(index + 1);
+
+  const middleY = (y1 + y2) / 2;
+
+  return `
+    M ${x1} ${y1}
+    C ${x1} ${middleY},
+      ${x2} ${middleY},
+      ${x2} ${y2}
+  `;
+}
 
   logout() {
     this.auth.logout();
