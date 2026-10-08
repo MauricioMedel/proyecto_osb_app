@@ -1,55 +1,105 @@
+:host {
+  display: block;
+}
+
 .game-page {
   min-height: 100vh;
   padding: 28px;
-  background: linear-gradient(180deg, #bfdbfe, #eff6ff);
+  box-sizing: border-box;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.12),
+      transparent 50%
+    ),
+    linear-gradient(180deg, #eff6ff, #f8fbff);
   font-family: Arial, sans-serif;
 }
 
+button {
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 4px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* Encabezado centrado */
+
 .game-header {
-  background: #ffffff;
-  border-radius: 28px;
-  padding: 22px 28px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 2fr)
+    minmax(0, 1fr);
   align-items: center;
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.16);
+  gap: 20px;
+  padding: 22px 28px;
   margin-bottom: 28px;
+  border: 1px solid #dbeafe;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12);
 
   h1 {
     margin: 0;
     color: #1e3a8a;
+    font-size: 30px;
   }
 
   p {
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     color: #64748b;
+    line-height: 1.5;
   }
 
-  button {
-    border: none;
-    background: #1e3a8a;
-    color: white;
+  > button {
+    justify-self: start;
     padding: 12px 16px;
+    border: none;
     border-radius: 14px;
+    background: #1e3a8a;
+    color: #ffffff;
     font-weight: bold;
-    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #2563eb;
+    }
   }
 }
 
+.game-heading {
+  min-width: 0;
+  text-align: center;
+}
+
 .points-box {
+  justify-self: end;
+  padding: 12px 18px;
+  border: 1px solid #fde68a;
+  border-radius: 18px;
   background: #fef3c7;
   color: #92400e;
-  padding: 12px 18px;
-  border-radius: 18px;
   font-weight: bold;
+  text-align: center;
 }
 
 .loading-card,
 .error-card {
-  background: white;
   padding: 20px;
+  margin-bottom: 18px;
   border-radius: 20px;
+  background: #ffffff;
   font-weight: bold;
+  line-height: 1.5;
 }
 
 .loading-card {
@@ -57,427 +107,721 @@
 }
 
 .error-card {
-  color: #dc2626;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
-/* =========================================
-   NUEVA ESTRUCTURA DEL MAPA CON SCROLL
-========================================= */
+/* Estructura del mapa */
 
 .map-card {
-  width: 100%;
-  border-radius: 34px;
-  background: linear-gradient(to bottom, #d4f0ff, #e8f9ed);
-  border: 4px solid #fff;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
-  overflow: hidden; /* Oculta lo que salga de los bordes redondeados */
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 4px solid #ffffff;
+  border-radius: 30px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.12);
 }
 
-/* Título fijo para que no se pierda al hacer scroll */
 .map-title-fixed {
+  padding: 20px;
+  border-bottom: 1px solid #dbeafe;
+  background: #ffffff;
   text-align: center;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 2px solid #e2e8f0;
-  z-index: 10;
-  
-  h2 {
-    margin: 0;
-    color: #1e3a8a;
-  }
 
   p {
-    margin: 6px 0 0;
+    margin: 0;
     color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
   }
 }
 
-/* El contenedor que permite deslizar los 50 niveles */
-.scroll-container {
-  height: 65vh; /* Puedes ajustar esto dependiendo de cuánto quieres que ocupe en pantalla */
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
+.park-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 14px;
+  color: #475569;
+  font-size: 12px;
+
+  span {
+    padding: 5px 9px;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
 }
 
-/* El lienzo que se estira dinámicamente con [style.height.px] */
+/* Ondas independientes del scroll */
+
+.map-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #eff6ff;
+}
+
+.animated-waves {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-wave {
+  position: absolute;
+  left: -20%;
+  width: 140%;
+  height: 85%;
+  border-radius: 44% 56% 62% 38% / 48% 42% 58% 52%;
+  animation: softWaveDrift 20s ease-in-out infinite alternate;
+}
+
+.wave-blue {
+  top: -35%;
+  background: rgba(96, 165, 250, 0.16);
+}
+
+.wave-green {
+  top: 45%;
+  left: -35%;
+  background: rgba(74, 222, 128, 0.1);
+  animation-duration: 26s;
+  animation-delay: -8s;
+}
+
+.wave-light {
+  top: 8%;
+  left: 15%;
+  background: rgba(147, 197, 253, 0.12);
+  animation-duration: 30s;
+  animation-delay: -14s;
+}
+
+.scroll-container {
+  position: relative;
+  z-index: 1;
+  height: 65vh;
+  min-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #93c5fd #eff6ff;
+
+  &::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #eff6ff;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 2px solid #eff6ff;
+    border-radius: 20px;
+    background: #93c5fd;
+  }
+}
+
 .map-background {
   position: relative;
   width: 100%;
-  /* Eliminamos el min-height fijo para que Angular inyecte la altura real */
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0 8%, transparent 9%),
-    linear-gradient(180deg, #dbeafe 0%, #bbf7d0 100%);
+  background: transparent;
 }
 
-.sun {
+/* Camino punteado */
+
+.park-path {
   position: absolute;
-  top: 30px;
-  right: 50px;
-  font-size: 64px;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.cloud {
-  position: absolute;
-  font-size: 58px;
-  opacity: 0.75;
+.trail-base {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 30px;
+  stroke-linecap: round;
 }
 
-.cloud-one {
-  top: 70px;
-  left: 80px;
+.trail-dots {
+  fill: none;
+  stroke: #93b8ed;
+  stroke-width: 5px;
+  stroke-linecap: round;
+  stroke-dasharray: 2 14;
 }
 
-.cloud-two {
-  top: 230px; /* Cambiado de bottom a top para que se quede arriba en el lienzo */
-  right: 110px;
+.trail-completed {
+  stroke: #22c55e;
 }
 
-.path-line {
-  position: absolute;
-  width: 78%;
-  height: 12px;
-  left: 10%;
-  top: 54%;
-  transform: rotate(-28deg);
-  border-radius: 999px;
-  background: repeating-linear-gradient(
-    90deg,
-    #2563eb,
-    #2563eb 18px,
-    #ffffff 18px,
-    #ffffff 34px
-  );
-  opacity: 0.8;
-  display: none; /* Te sugiero ocultar la línea por ahora, ya que el camino en zig-zag de 50 niveles requeriría dibujar líneas entre cada punto mediante SVG */
-}
+/* Niveles */
 
-/* Nodos */
 .level-node {
   position: absolute;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  cursor: pointer;
   z-index: 2;
-  transition: transform 0.2s ease;
-}
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 132px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  -webkit-tap-highlight-color: transparent;
 
-.level-node:hover {
-  transform: translate(-50%, -50%) scale(1.05);
+  &:focus-visible {
+    border-radius: 20px;
+    outline-offset: 7px;
+  }
 }
 
 .node-circle {
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
+  position: relative;
   display: grid;
   place-items: center;
-  font-size: 38px;
-  background: white;
-  border: 7px solid #94a3b8;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+  width: 78px;
+  height: 78px;
+  box-sizing: border-box;
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  background: #e8eef7;
+  font-size: 32px;
   transition: transform 0.2s ease;
 }
 
-.level-node:hover .node-circle {
-  transform: scale(1.08);
+.level-node:not(.locked):hover .node-circle {
+  transform: translateY(-3px);
+}
+
+.level-node:not(.locked):active .node-circle {
+  transform: translateY(2px);
 }
 
 .completed .node-circle {
-  background: #dcfce7;
-  border-color: #22c55e;
+  background: linear-gradient(145deg, #dcfce7, #4ade80);
+  box-shadow:
+    0 6px 0 #16a34a,
+    0 12px 18px rgba(22, 163, 74, 0.16);
 }
 
 .unlocked .node-circle {
-  background: #dbeafe;
-  border-color: #2563eb;
-  animation: pulse 1.3s infinite;
+  background: linear-gradient(145deg, #60a5fa, #2563eb);
+  box-shadow:
+    0 6px 0 #1d4ed8,
+    0 0 0 8px rgba(250, 204, 21, 0.3);
+  animation: levelGlow 2.5s ease-in-out infinite;
+}
+
+.locked {
+  cursor: not-allowed;
 }
 
 .locked .node-circle {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  filter: grayscale(1);
+  background: #e8eef7;
+  box-shadow:
+    0 6px 0 #b0bfd4,
+    0 10px 16px rgba(51, 65, 85, 0.08);
+
+  > span:first-child {
+    opacity: 0.65;
+    filter: grayscale(1);
+  }
+}
+
+.level-number {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #15803d;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.unlocked .level-number {
+  background: #1e3a8a;
+}
+
+.locked .level-number {
+  background: #64748b;
 }
 
 .node-label {
-  margin-top: 10px;
-  background: white;
-  border-radius: 16px;
-  padding: 8px 12px;
-  min-width: 90px;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
   position: relative;
   z-index: 3;
+  min-width: 100px;
+  max-width: 132px;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 7px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08);
 
   strong {
     display: block;
     color: #1e3a8a;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.4;
   }
 
   small {
+    display: block;
+    margin-top: 3px;
     color: #64748b;
+    font-size: 11px;
     font-weight: bold;
   }
+}
+
+.start-sign,
+.next-level-sign {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  padding: 6px 11px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.start-sign {
+  background: #1e3a8a;
+  color: #ffffff;
+}
+
+.next-level-sign {
+  border: 1px solid #fde68a;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.park-footer {
+  padding: 13px 18px;
+  border-top: 1px solid #dbeafe;
+  background: #ffffff;
+  color: #1e3a8a;
+  font-size: 13px;
+  text-align: center;
 }
 
 .feedback {
   position: fixed;
   bottom: 28px;
   left: 50%;
-  transform: translateX(-50%);
+  z-index: 100;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  box-sizing: border-box;
+  padding: 14px 20px;
+  border: 1px solid #fde68a;
+  border-radius: 18px;
   background: #fef3c7;
   color: #92400e;
-  padding: 14px 20px;
-  border-radius: 18px;
   font-weight: bold;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  line-height: 1.5;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  transform: translateX(-50%);
 }
 
-/* =========================================
-   MODALES (QUIZ Y TROFEOS)
-========================================= */
+/* Modal del quiz */
 
-.challenge-modal {
+.challenge-modal,
+.trophy-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
   display: grid;
   place-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  backdrop-filter: blur(5px);
+}
+
+.challenge-modal {
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.5);
 }
 
 .challenge-card {
   position: relative;
   width: 560px;
-  max-width: 90%;
-  background: white;
-  border-radius: 34px;
+  max-width: 100%;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
   padding: 34px;
+  border-radius: 30px;
+  background: #ffffff;
   text-align: center;
   box-shadow: 0 22px 50px rgba(15, 23, 42, 0.25);
 
   h2 {
-    color: #1e3a8a;
-    font-size: 32px;
     margin: 10px 0;
+    color: #1e3a8a;
+    font-size: 28px;
+    line-height: 1.3;
   }
 
   p {
     color: #64748b;
+    line-height: 1.5;
   }
 }
 
 .close-btn {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  border: none;
-  background: #fee2e2;
-  color: #dc2626;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
   width: 36px;
   height: 36px;
+  border: none;
   border-radius: 50%;
+  background: #fee2e2;
+  color: #b91c1c;
   font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-  
-  &:hover {
-    background: #f87171;
-    color: white;
+
+  &:hover:not(:disabled) {
+    background: #fecaca;
   }
 }
 
 .level-badge {
-  width: 100px;
-  height: 100px;
+  display: grid;
+  place-items: center;
+  width: 90px;
+  height: 90px;
   margin: auto;
   border-radius: 50%;
   background: linear-gradient(135deg, #2563eb, #22c55e);
-  display: grid;
-  place-items: center;
-  font-size: 52px;
+  font-size: 46px;
 }
 
 .question-box {
-  background: #f8fbff;
-  border-radius: 24px;
   padding: 22px;
   margin-top: 24px;
+  border-radius: 24px;
+  background: #f8fbff;
 
   h3 {
-    color: #1e3a8a;
     margin-top: 0;
+    color: #1e3a8a;
+  }
+
+  h2 {
+    font-size: 23px;
   }
 }
 
 .answers-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Cambio a 2 columnas para 4 opciones */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  margin-top: 20px;
 }
 
 .answer-card {
-  border: 3px solid #dbeafe;
-  background: white;
-  border-radius: 20px;
   padding: 18px;
-  font-weight: bold;
+  border: 3px solid #dbeafe;
+  border-radius: 20px;
+  background: #ffffff;
   color: #334155;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
 
-  span {
-    display: block;
-    font-size: 42px;
-    margin-bottom: 8px;
-  }
-
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: #93c5fd;
     background: #eff6ff;
   }
-}
 
-.answer-card.selected {
-  border-color: #22c55e;
-  background: #f0fdf4;
-  transform: scale(0.98);
+  &.selected {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    transform: scale(0.98);
+  }
 }
 
 .modal-feedback {
-  margin-top: 18px;
-  background: #dcfce7;
-  color: #15803d;
   padding: 12px;
+  margin-top: 18px;
   border-radius: 16px;
+  background: #eff6ff;
+  color: #1e3a8a;
   font-weight: bold;
+  line-height: 1.5;
 }
 
 .next-btn {
+  padding: 14px 22px;
   margin-top: 20px;
   border: none;
-  background: #2563eb;
-  color: white;
-  padding: 14px 22px;
   border-radius: 18px;
+  background: #2563eb;
+  color: #ffffff;
   font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-  
-  &:hover {
+
+  &:hover:not(:disabled) {
     background: #1d4ed8;
   }
 }
 
+/* Modal de trofeos */
+
 .trophy-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: 9999;
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.75);
 }
 
 .trophy-modal {
   width: 420px;
-  max-width: 90%;
-  background: white;
-  border-radius: 30px;
+  max-width: 100%;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
   padding: 40px;
+  border-radius: 30px;
+  background: #ffffff;
   text-align: center;
-  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.25);
   animation: trophyPop 0.4s ease;
-  
+
   h2 {
-    color: #2563eb;
     margin: 10px 0 0;
+    color: #2563eb;
   }
 
   h3 {
+    margin: 12px 0;
     color: #1e3a8a;
     font-size: 28px;
-    margin: 12px 0;
   }
 
   p {
-    color: #64748b;
     margin-bottom: 25px;
+    color: #64748b;
+    line-height: 1.5;
   }
 }
 
 .sparkles {
-  font-size: 32px;
   margin-bottom: 15px;
+  font-size: 32px;
 }
 
 .trophy-icon {
   font-size: 90px;
-  animation: bounce 1s infinite;
+  animation: bounce 2s ease-in-out infinite;
 }
 
 .trophy-btn {
-  border: none;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
   padding: 14px 24px;
+  border: none;
   border-radius: 16px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #ffffff;
   font-size: 16px;
   font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s;
-  
-  &:hover {
-    transform: scale(1.05);
+  transition: transform 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
   }
 }
 
-/* =========================================
-   ANIMACIONES Y RESPONSIVE
-========================================= */
+/* Animaciones */
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+@keyframes softWaveDrift {
+  from {
+    transform: translate(-2%, -2%) rotate(-8deg);
+  }
+
+  to {
+    transform: translate(4%, 3%) rotate(8deg);
+  }
+}
+
+@keyframes levelGlow {
+  0%, 100% {
+    box-shadow:
+      0 6px 0 #1d4ed8,
+      0 0 0 7px rgba(250, 204, 21, 0.3);
+  }
+
+  50% {
+    box-shadow:
+      0 6px 0 #1d4ed8,
+      0 0 0 12px rgba(250, 204, 21, 0.1);
+  }
 }
 
 @keyframes trophyPop {
   from {
-    transform: scale(0.7);
     opacity: 0;
+    transform: scale(0.9);
   }
+
   to {
-    transform: scale(1);
     opacity: 1;
+    transform: scale(1);
   }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
+
+/* Responsive */
 
 @media (max-width: 900px) {
   .game-header {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    justify-items: center;
     gap: 16px;
-    text-align: center;
+
+    > button,
+    .points-box {
+      justify-self: center;
+    }
+  }
+
+  .scroll-container {
+    height: 70vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .game-page {
+    padding: 12px;
+  }
+
+  .game-header {
+    padding: 20px 16px;
+    margin-bottom: 18px;
+    border-radius: 24px;
+
+    h1 {
+      font-size: 25px;
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+
+  .map-card {
+    border-radius: 24px;
+  }
+
+  .map-title-fixed {
+    padding: 16px;
+  }
+
+  .park-legend {
+    gap: 8px;
+    font-size: 10px;
+  }
+
+  .level-node {
+    width: 106px;
+  }
+
+  .node-circle {
+    width: 68px;
+    height: 68px;
+    font-size: 28px;
+  }
+
+  .node-label {
+    min-width: 86px;
+    max-width: 106px;
+  }
+
+  .park-footer {
+    font-size: 11px;
+  }
+
+  .challenge-modal,
+  .trophy-overlay {
+    padding: 12px;
+  }
+
+  .challenge-card,
+  .trophy-modal {
+    max-height: calc(100dvh - 24px);
+    padding: 28px 18px;
+    border-radius: 24px;
+  }
+
+  .challenge-card > h2 {
+    font-size: 24px;
+  }
+
+  .question-box {
+    padding: 16px;
+
+    h2 {
+      font-size: 21px;
+    }
   }
 
   .answers-grid {
-    grid-template-columns: 1fr; /* En pantallas muy pequeñas, se apilan a 1 columna */
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  
-  .scroll-container {
-    height: 70vh; /* Un poco más alto en móvil */
+
+  .answer-card {
+    padding: 14px;
+  }
+
+  .feedback {
+    bottom: 16px;
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background-wave,
+  .unlocked .node-circle,
+  .trophy-icon,
+  .trophy-modal {
+    animation: none;
+  }
+
+  .node-circle,
+  .answer-card,
+  .trophy-btn,
+  .game-header button {
+    transition: none;
   }
 }
