@@ -6,6 +6,7 @@
 
     <div class="game-heading">
       <h1>🎮 Mundo Saludable</h1>
+
       <p>
         Hola {{ childName }}, desbloquea niveles y gana recompensas.
       </p>
@@ -22,6 +23,15 @@
 
   <div *ngIf="errorMessage" class="error-card" role="alert">
     {{ errorMessage }}
+
+    <button
+      type="button"
+      class="next-btn"
+      (click)="loadLevels()"
+      [disabled]="loading"
+    >
+      Reintentar
+    </button>
   </div>
 
   <section class="map-card" *ngIf="!loading">
@@ -38,7 +48,6 @@
     </div>
 
     <div class="map-stage">
-      <!-- Fondo animado detrás del área desplazable -->
       <div class="animated-waves" aria-hidden="true">
         <div class="background-wave wave-blue"></div>
         <div class="background-wave wave-green"></div>
@@ -48,12 +57,11 @@
       <div class="scroll-container">
         <div
           class="map-background"
-          [style.height.px]="(levels.length * 140) + 200"
+          [style.height.px]="levels.length * 140 + 200"
         >
-          <!-- Camino entre niveles -->
           <svg
             class="park-path"
-            [attr.viewBox]="'0 0 100 ' + ((levels.length * 140) + 200)"
+            [attr.viewBox]="'0 0 100 ' + (levels.length * 140 + 200)"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
@@ -78,7 +86,6 @@
             </ng-container>
           </svg>
 
-          <!-- Niveles -->
           <button
             type="button"
             class="level-node"
@@ -172,6 +179,27 @@
 
       <p>{{ selectedLevel.description }}</p>
 
+      <div class="lives-panel" *ngIf="!loadingQuiz && quiz.length">
+        <span class="lives-title">Tus oportunidades</span>
+
+        <div
+          class="hearts"
+          role="img"
+          [attr.aria-label]="
+            lives + ' de ' + maxLives + ' oportunidades disponibles'
+          "
+        >
+          <span
+            class="heart"
+            *ngFor="let heart of hearts"
+            [class.empty]="heart > lives"
+            aria-hidden="true"
+          >
+            {{ heart <= lives ? '❤️' : '🤍' }}
+          </span>
+        </div>
+      </div>
+
       <div
         *ngIf="loadingQuiz"
         class="question-box"
@@ -196,11 +224,44 @@
             type="button"
             class="answer-card"
             *ngFor="let option of currentQuestion.options"
-            [class.selected]="selectedAnswer === option"
+            [class.correct]="
+              isAnswerRevealed &&
+              selectedAnswer === option &&
+              option === currentQuestion.answer
+            "
+            [class.incorrect]="
+              isAnswerRevealed &&
+              selectedAnswer === option &&
+              option !== currentQuestion.answer
+            "
+            [disabled]="isAnswerRevealed || savingResult"
             (click)="selectAnswer(option)"
           >
-            {{ option }}
+            <span class="answer-text">{{ option }}</span>
+
+            <span
+              class="answer-mark"
+              *ngIf="isAnswerRevealed && selectedAnswer === option"
+              aria-hidden="true"
+            >
+              {{ option === currentQuestion.answer ? '✓' : '✕' }}
+            </span>
           </button>
+        </div>
+
+        <div
+          *ngIf="answerFeedback"
+          class="answer-feedback"
+          [class.correct-feedback]="
+            selectedAnswer === currentQuestion.answer
+          "
+          [class.incorrect-feedback]="
+            selectedAnswer !== currentQuestion.answer
+          "
+          role="status"
+          aria-live="polite"
+        >
+          {{ answerFeedback }}
         </div>
       </div>
 
@@ -208,28 +269,98 @@
         *ngIf="quizFinished"
         class="question-box result-box"
       >
-        <h2>🎉 ¡Quiz completado!</h2>
-        <h3>Resultado final</h3>
+        <ng-container *ngIf="lostAllLives; else completedQuiz">
+          <div class="result-icon" aria-hidden="true">💪</div>
 
-        <p>
-          Respuestas correctas: {{ score }} de {{ quiz.length }}
-        </p>
+          <h2>¡Vamos a intentarlo otra vez!</h2>
 
-        <p>
-          Porcentaje:
-          {{
-            (quiz.length ? (score / quiz.length) * 100 : 0)
-              | number:'1.0-0'
-          }}%
-        </p>
+          <p>
+            Se terminaron tus tres oportunidades.
+            Puedes repetir el nivel con nuevos corazones.
+          </p>
+
+          <p>
+            Respuestas correctas en este intento: {{ score }}
+          </p>
+        </ng-container>
+
+        <ng-template #completedQuiz>
+          <div class="result-icon" aria-hidden="true">
+            {{
+              savingResult
+                ? '⏳'
+                : passedLevel
+                  ? '🎉'
+                  : '📚'
+            }}
+          </div>
+
+          <h2>
+            {{
+              savingResult
+                ? 'Guardando resultado...'
+                : passedLevel
+                  ? '¡Nivel superado!'
+                  : 'Quiz finalizado'
+            }}
+          </h2>
+
+          <p>
+            Respuestas correctas: {{ score }} de {{ quiz.length }}
+          </p>
+
+          <p>
+            Porcentaje:
+            {{
+              (quiz.length ? (score / quiz.length) * 100 : 0)
+                | number:'1.0-0'
+            }}%
+          </p>
+        </ng-template>
+
+        <div class="result-actions">
+          <button
+            *ngIf="!lostAllLives && !resultSaved && !savingResult"
+            type="button"
+            class="next-btn"
+            (click)="saveQuizResult()"
+          >
+            Reintentar guardado
+          </button>
+
+          <button
+            *ngIf="lostAllLives || (resultSaved && !passedLevel)"
+            type="button"
+            class="next-btn"
+            (click)="retryLevel()"
+            [disabled]="savingResult || loadingQuiz"
+          >
+            🔄 Repetir nivel
+          </button>
+
+          <button
+            type="button"
+            class="next-btn secondary-btn"
+            (click)="closeChallenge()"
+            [disabled]="savingResult"
+          >
+            Volver al mapa
+          </button>
+        </div>
+      </div>
+
+      <div
+        *ngIf="!loadingQuiz && !quiz.length"
+        class="question-box"
+      >
+        <p>No hay preguntas disponibles en este momento.</p>
 
         <button
           type="button"
           class="next-btn"
-          (click)="closeChallenge()"
-          [disabled]="savingResult"
+          (click)="retryLevel()"
         >
-          Volver al mapa
+          Reintentar
         </button>
       </div>
 
@@ -237,6 +368,7 @@
         class="modal-feedback"
         *ngIf="feedbackMessage"
         role="status"
+        aria-live="polite"
       >
         {{ feedbackMessage }}
       </div>
